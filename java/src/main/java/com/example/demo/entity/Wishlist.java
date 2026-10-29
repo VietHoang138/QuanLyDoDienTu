@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -17,6 +18,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Wishlist {
     
     @EmbeddedId
@@ -25,10 +27,13 @@ public class Wishlist {
     @ManyToOne
     @MapsId("khachHangId")
     @JoinColumn(name = "khach_hang_id")
+    @JsonIgnoreProperties({"taiKhoans", "matKhau", "hibernateLazyInitializer", "handler"})
     private KhachHang khachHang;
     
     @ManyToOne
     @MapsId("sanPhamId")
     @JoinColumn(name = "san_pham_id")
+    @JsonIgnoreProperties({"hinhAnhList", "danhMucCha", "danhMucCon", "thuongHieu",
+                            "mauSac", "dungLuong", "hibernateLazyInitializer", "handler"})
     private SanPham sanPham;
-} 
+}

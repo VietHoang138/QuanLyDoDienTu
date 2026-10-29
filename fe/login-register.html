@@ -348,56 +348,33 @@
                     this.isLoading = true;
                     
                     try {
-                        // Kiểm tra xem tài khoản có phải là admin đặc biệt không
-                        if (this.loginForm.email === 'viethoang123@gmail.com' && this.loginForm.matKhau === '123456') {
-                            // Nếu là admin đặc biệt, bỏ qua API call và đăng nhập trực tiếp
-                            this.showAlert('login', 'Đăng nhập thành công!', true);
-                            
-                            // Tạo thông tin người dùng admin
-                            const adminInfo = {
-                                idKH: 'admin123',
-                                hoTen: 'Việt Hoàng',
-                                email: 'viethoang123@gmail.com'
-                            };
-                            
-                            // Lưu thông tin vào localStorage
-                            localStorage.setItem('userInfo', JSON.stringify(adminInfo));
-                            localStorage.setItem('idKH', adminInfo.idKH);
-                            localStorage.setItem('isLoggedIn', 'true');
-                            localStorage.setItem('hoTen', adminInfo.hoTen);
-                            localStorage.setItem('vaiTro', 'ADMIN');
-                            localStorage.setItem('email', adminInfo.email);
-                            
-                            // Chuyển đến trang admin
-                            setTimeout(() => {
-                                window.location.href = 'admins.html';
-                            }, 1000);
-                            return;
-                        }
-                        
-                        // Xử lý đăng nhập thông thường qua API
+                        // Xử lý đăng nhập qua API (bao gồm cả tài khoản admin@techno.vn)
                         const response = await axios.post(`${this.API_URL}/dang-nhap`, {
                             email: this.loginForm.email,
                             matKhau: this.loginForm.matKhau
                         });
                         
                         if (response.data.success) {
-                            this.showAlert('login', response.data.message, true);
+                            this.showAlert('login', response.data.message || 'Đăng nhập thành công!', true);
                             
-                            // Lưu thông tin người dùng
                             this.userInfo = response.data.data;
                             
-                            // Lưu thông tin vào localStorage để sử dụng trên toàn trang web
+                            // Lưu thông tin vào localStorage
                             localStorage.setItem('userInfo', JSON.stringify(this.userInfo));
                             localStorage.setItem('idKH', this.userInfo.idKH);
                             localStorage.setItem('isLoggedIn', 'true');
                             localStorage.setItem('hoTen', this.userInfo.hoTen);
-                            localStorage.setItem('vaiTro', 'USER');
                             localStorage.setItem('email', this.userInfo.email);
+                            localStorage.setItem('vaiTro', this.userInfo.vaiTro || 'USER');
                             
-                            // Chuyển hướng sau 1 giây
+                            // Nếu là ADMIN → chuyển đến trang admin
+                            // Nếu là USER → chuyển đến trang chủ
                             setTimeout(() => {
-                                window.location.href = 'index.html';
+                                if (this.userInfo.vaiTro === 'ADMIN') {
+                                    window.location.href = 'admins.html';
+                                } else {
+                                    window.location.href = 'index.html';
+                                }
                             }, 1000);
                         } else {
                             this.showAlert('login', response.data.message, false);
@@ -469,29 +446,16 @@
                 async checkLoginStatus() {
                     const idKH = localStorage.getItem('idKH');
                     const isLoggedIn = localStorage.getItem('isLoggedIn');
+                    const vaiTro = localStorage.getItem('vaiTro');
                     
                     if (idKH && isLoggedIn === 'true') {
-                        try {
-                            const response = await axios.get(`${this.API_URL}/thong-tin/${idKH}`);
-                            
-                            if (response.data.success) {
-                                this.isLoggedIn = true;
-                                this.userInfo = response.data.data;
-                                
-                                // Cập nhật thông tin trong localStorage
-                                localStorage.setItem('userInfo', JSON.stringify(this.userInfo));
-                                localStorage.setItem('hoTen', this.userInfo.hoTen);
-                                
-                                // Nếu đã đăng nhập và đang ở trang login, chuyển về trang chủ
-                                if (window.location.pathname.includes('login-register.html')) {
-                                    window.location.href = 'index.html';
-                                }
+                        // Nếu đang ở trang login → redirect ngay theo vai trò
+                        if (window.location.pathname.includes('login-register.html')) {
+                            if (vaiTro === 'ADMIN') {
+                                window.location.href = 'admins.html';
                             } else {
-                                this.handleLogout();
+                                window.location.href = 'index.html';
                             }
-                        } catch (error) {
-                            console.error('Lỗi kiểm tra đăng nhập:', error);
-                            this.handleLogout();
                         }
                     }
                 },

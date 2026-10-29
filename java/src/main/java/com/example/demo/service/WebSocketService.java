@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.DonHangNotificationDTO;
 import com.example.demo.dto.SanPhamListDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,80 +19,117 @@ public class WebSocketService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    /**
-     * Gửi thông báo khi có sản phẩm mới được thêm
-     */
+    // ═══════════════════════════════════════════════════════════
+    //  SẢN PHẨM
+    // ═══════════════════════════════════════════════════════════
+
     public void notifyProductAdded(SanPhamListDTO product) {
         try {
             Map<String, Object> message = new HashMap<>();
             message.put("type", "PRODUCT_ADDED");
             message.put("data", product);
             message.put("timestamp", System.currentTimeMillis());
-            
-            // Gửi đến tất cả client đang kết nối
             messagingTemplate.convertAndSend("/topic/products", message);
-            
             System.out.println("📡 WebSocket: Đã gửi thông báo sản phẩm mới - " + product.getTenSanPham());
         } catch (Exception e) {
             System.err.println("❌ Lỗi gửi WebSocket notification: " + e.getMessage());
         }
     }
 
-    /**
-     * Gửi thông báo khi sản phẩm được cập nhật
-     */
     public void notifyProductUpdated(SanPhamListDTO product) {
         try {
             Map<String, Object> message = new HashMap<>();
             message.put("type", "PRODUCT_UPDATED");
             message.put("data", product);
             message.put("timestamp", System.currentTimeMillis());
-            
             messagingTemplate.convertAndSend("/topic/products", message);
-            
             System.out.println("📡 WebSocket: Đã gửi thông báo cập nhật sản phẩm - " + product.getTenSanPham());
         } catch (Exception e) {
             System.err.println("❌ Lỗi gửi WebSocket notification: " + e.getMessage());
         }
     }
 
-    /**
-     * Gửi thông báo khi sản phẩm bị xóa
-     */
     public void notifyProductDeleted(Integer productId) {
         try {
             Map<String, Object> message = new HashMap<>();
             message.put("type", "PRODUCT_DELETED");
             message.put("productId", productId);
             message.put("timestamp", System.currentTimeMillis());
-            
             messagingTemplate.convertAndSend("/topic/products", message);
-            
             System.out.println("📡 WebSocket: Đã gửi thông báo xóa sản phẩm ID - " + productId);
         } catch (Exception e) {
             System.err.println("❌ Lỗi gửi WebSocket notification: " + e.getMessage());
         }
     }
 
-    /**
-     * Gửi thông báo reload toàn bộ danh sách sản phẩm
-     */
     public void notifyProductsReload() {
         try {
             Map<String, Object> message = new HashMap<>();
             message.put("type", "PRODUCTS_RELOAD");
             message.put("timestamp", System.currentTimeMillis());
-            
             messagingTemplate.convertAndSend("/topic/products", message);
-            
             System.out.println("📡 WebSocket: Đã gửi thông báo reload danh sách sản phẩm");
         } catch (Exception e) {
             System.err.println("❌ Lỗi gửi WebSocket notification: " + e.getMessage());
         }
     }
 
+    // ═══════════════════════════════════════════════════════════
+    //  ĐƠN HÀNG — gửi đến /topic/orders (admin lắng nghe)
+    //             gửi đến /topic/orders/{idKH} (khách hàng lắng nghe)
+    // ═══════════════════════════════════════════════════════════
+
     /**
-     * Gửi thông báo tùy chỉnh
+     * Broadcast đến admin khi có đơn hàng MỚI vừa được đặt.
+     * Admin subscribe: /topic/orders
+     */
+    public void notifyNewOrder(DonHangNotificationDTO notification) {
+        try {
+            notification.setType("NEW_ORDER");
+            notification.setTimestamp(System.currentTimeMillis());
+            if (notification.getMessage() == null) {
+                notification.setMessage("Đơn hàng mới #" + notification.getDonHangId()
+                        + " từ " + notification.getTenKhachHang());
+            }
+            messagingTemplate.convertAndSend("/topic/orders", notification);
+            System.out.println("📡 WebSocket [NEW_ORDER]: Đơn hàng #" + notification.getDonHangId());
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi WebSocket NEW_ORDER: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Broadcast đến admin khi trạng thái đơn hàng được cập nhật.
+     * Admin subscribe: /topic/orders
+     * Khách hàng subscribe: /topic/orders/{idKH}
+     */
+    public void notifyOrderStatusUpdated(DonHangNotificationDTO notification) {
+        try {
+            notification.setType("STATUS_UPDATED");
+            notification.setTimestamp(System.currentTimeMillis());
+            if (notification.getMessage() == null) {
+                notification.setMessage("Đơn hàng #" + notification.getDonHangId()
+                        + " → " + notification.getTenTrangThai());
+            }
+
+            // Gửi cho admin
+            messagingTemplate.convertAndSend("/topic/orders", notification);
+
+            // Gửi riêng cho khách hàng (nếu có idKH)
+            if (notification.getKhachHangId() != null) {
+                messagingTemplate.convertAndSend(
+                        "/topic/orders/" + notification.getKhachHangId(), notification);
+            }
+
+            System.out.println("📡 WebSocket [STATUS_UPDATED]: Đơn #"
+                    + notification.getDonHangId() + " → " + notification.getTenTrangThai());
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi WebSocket STATUS_UPDATED: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gửi thông báo tùy chỉnh đến bất kỳ topic nào.
      */
     public void sendCustomMessage(String topic, Object message) {
         try {
