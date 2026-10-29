@@ -1,0 +1,50 @@
+/*--------------------------------------------------------------
+# Category Page Specific Styles
+--------------------------------------------------------------*/
+
+.filters-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacer-4);
+    flex-wrap: wrap;
+    gap: var(--spacer-3);
+    padding-bottom: var(--spacer-3);
+    border-bottom: 1px solid var(--border-color);
+}
+.filters-toolbar label {
+    margin-right: var(--spacer-2);
+    font-size: 0.9rem;
+    margin-bottom: 0; /* Override default label margin */
+    display: inline-block; /* Allow inline display */
+}
+.filters-toolbar select {
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    display: inline-block; /* Allow inline display */
+    width: auto; /* Override default input width */
+}
+.filters-toolbar .filter-info {
+    margin-left: var(--spacer-3);
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+/* Responsive adjustments for filter toolbar if needed */
+@media (max-width: 768px) {
+    .filters-toolbar {
+        flex-direction: column;
+        align-items: stretch; /* Stretch items */
+        gap: var(--spacer-3);
+    }
+    .filters-toolbar > div {
+        display: flex;
+        justify-content: space-between; /* Space out filter btn and sort */
+        width: 100%;
+    }
+    /* Removed empty ruleset for .filters-toolbar > div:first-child */
+     .filters-toolbar select {
+         flex-grow: 1; /* Allow select to grow */
+     }
+}

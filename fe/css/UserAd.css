@@ -1,0 +1,243 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  body {
+    background-color: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+    .container {
+      display: flex;
+      flex: 1 0 auto;
+      min-height: auto;
+      margin-bottom: 50px;
+    }
+  
+    .wrapper {
+        display: flex;
+        height: 100vh;      /* Chiều cao full màn hình */
+        width: 100vw;       /* Chiều rộng full màn hình */
+        margin: 0;
+        padding: 0;
+      }
+  /* Sidebar */
+  .sidebar {
+    width: 240px;                /* Chiều rộng sidebar */
+    color: #fff;
+    padding: 20px;
+    flex-shrink: 0;
+  }
+  
+  /* Nội dung chính nằm bên phải */
+  .main {
+    flex: 1;                     /* Chiếm hết phần còn lại */
+    padding: 30px;
+    background-color: #fff;
+    overflow-y: auto;
+  }
+  
+  
+  .sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    padding: 12px 20px;
+  }
+  
+  .sidebar li a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .sidebar ul li a {
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .sidebar li.active,
+  .sidebar li:hover {
+    background-color: #495057;
+  }
+  .sidebar li:hover a{
+    color: #ffff;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .total-users {
+    font-size: 16px;
+  }
+  
+  /* Table styling */
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .user-table th, .user-table td {
+    border: 1px solid #dee2e6;
+    padding: 14px;
+    text-align: left;
+  }
+  
+  .user-table th {
+    background-color: #e9ecef;
+  }
+  
+  /* Delete button */
+  .delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .delete-btn:hover {
+    background-color: #c82333;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  body {
+    background-color: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+    .container {
+      display: flex;
+      flex: 1 0 auto;
+      min-height: auto;
+      margin-bottom: 50px;
+    }
+    .wrapper {
+      display: flex;
+      height: 100vh;      /* Chiều cao full màn hình */
+      width: 100vw;       /* Chiều rộng full màn hình */
+      margin: 0;
+      padding: 0;
+    }
+  
+    .sidebar {
+      width: 240px;                /* Chiều rộng sidebar */
+      color: #fff;
+      padding: 20px;
+      flex-shrink: 0;
+    }
+  
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .sidebar li {
+      padding: 12px 20px;
+    }
+    
+    .sidebar li a {
+      color: #fff;
+      text-decoration: none;
+      display: block;
+    }
+    
+    .sidebar ul li a {
+      color: #333;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .sidebar li.active,
+    .sidebar li:hover {
+      background-color: #495057;
+    }
+    .sidebar li:hover a{
+      color: #ffff;
+    }
+  
+  .main-content {
+    flex: 1;                     /* Chiếm hết phần còn lại */
+      padding: 30px;
+      background-color: #fff;
+      overflow-y: auto;
+    }
+  
+  .main-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
+  
+  .total-users {
+    font-size: 16px;
+  }
+  
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .user-table th, .user-table td {
+    border: 1px solid #dee2e6;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .user-table th {
+    background-color: #e9ecef;
+  }
+  
+  .delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .delete-btn:hover {
+    background-color: #c82333;
+  }

@@ -1,0 +1,121 @@
+/*--------------------------------------------------------------
+# About Page Specific Styles
+--------------------------------------------------------------*/
+
+.about-section {
+    margin-bottom: var(--spacer-6);
+}
+
+.text-content {
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.text-content img.about-logo { /* Specific class for logo */
+    margin-bottom: var(--spacer-4);
+    height: 50px; /* Or desired height */
+    width: auto;
+}
+
+.mission-vision {
+    padding: var(--spacer-6) 0;
+}
+.mission-vision .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacer-5);
+    text-align: center;
+}
+.mission-vision i {
+    font-size: 3rem; /* Use fa-3x class instead if preferred */
+    color: var(--black);
+    margin-bottom: var(--spacer-3);
+}
+.mission-vision h3 {
+    font-size: 1.4rem;
+    margin-bottom: var(--spacer-3);
+    font-weight: var(--font-weight-semibold);
+}
+.mission-vision p {
+    color: var(--gray-700);
+    line-height: 1.7;
+}
+
+.why-choose-us h2 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: var(--spacer-5);
+    font-weight: var(--font-weight-semibold);
+}
+.why-choose-us .feature-grid { /* Reuse feature grid */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacer-4);
+}
+/* Reuse .feature-card from core styles if applicable */
+/* Or define specific styles */
+.why-choose-us .feature-item {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacer-4);
+    text-align: center;
+}
+.why-choose-us .feature-item i { /* Style icon if different */
+    font-size: 2.5rem;
+    color: var(--black);
+    margin-bottom: var(--spacer-3);
+}
+.why-choose-us .feature-item h3 {
+    font-size: 1.1rem;
+    margin-bottom: var(--spacer-2);
+    font-weight: var(--font-weight-semibold);
+}
+.why-choose-us .feature-item p {
+     color: var(--gray-700);
+     font-size: 0.9rem;
+     line-height: 1.6;
+     margin-bottom: 0;
+}
+
+.team {
+    padding: var(--spacer-6) 0;
+    text-align: center;
+}
+.team h2 {
+    font-size: 1.8rem;
+    margin-bottom: var(--spacer-4);
+    font-weight: var(--font-weight-semibold);
+}
+.team p {
+    color: var(--gray-700);
+    margin-bottom: var(--spacer-5);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+}
+.store-locations {
+    padding: var(--spacer-6) 0;
+    text-align: center;
+}
+.store-locations h2 {
+    font-size: 1.8rem;
+    margin-bottom: var(--spacer-5);
+    font-weight: var(--font-weight-semibold);
+}
+.store-locations div {
+    text-align: left;
+    
+}
+.store-locations h3 {
+    font-size: 1.2rem;
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacer-2);
+}
+.store-locations p {
+    color: var(--gray-700);
+    font-size: 1rem;
+    line-height: 1.6;
+}

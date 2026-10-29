@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục - TechNo</title>
+    <link rel="stylesheet" href="css/core-styles.css">
+    <link rel="stylesheet" href="css/sanpham.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/IMAGES/lg.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Skeleton loading */
+        .skeleton { animation: shimmer 1.4s infinite; background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 200% 100%; border-radius: 8px; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .skeleton-card { border-radius: 8px; overflow: hidden; border: 1px solid #eee; }
+        .skeleton-img { height: 200px; }
+        .skeleton-text { height: 14px; margin: 8px 12px; border-radius: 4px; }
+        .skeleton-text.short { width: 60%; }
+
+        /* Category tabs */
+        .category-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+        .cat-tab { padding: 8px 16px; border: 1.5px solid #ddd; border-radius: 20px; cursor: pointer;
+                   font-size: 0.9rem; background: #fff; transition: all .2s; white-space: nowrap; }
+        .cat-tab:hover { border-color: #333; }
+        .cat-tab.active { background: #333; color: #fff; border-color: #333; }
+
+        /* Price range filter */
+        .price-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .price-btn { padding: 6px 14px; border: 1px solid #ddd; border-radius: 16px; cursor: pointer;
+                     font-size: 0.85rem; background: #fff; transition: all .2s; }
+        .price-btn:hover { border-color: #333; }
+        .price-btn.active { background: #e53935; color: #fff; border-color: #e53935; }
+
+        /* Product count badge */
+        .count-badge { background: #f0f0f0; color: #555; padding: 2px 10px; border-radius: 12px; font-size: 0.85rem; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 60px 20px; color: #888; }
+        .empty-state i { font-size: 3rem; margin-bottom: 16px; color: #ddd; }
+        .empty-state p { font-size: 1rem; }
+
+        /* Error state */
+        .error-state { text-align: center; padding: 40px 20px; color: #e53935; }
+
+        /* Product image */
+        .product-image img { height: 200px; object-fit: contain; background: #fafafa; }
+
+        /* Pagination */
+        .pagination-wrap { display: flex; justify-content: center; gap: 6px; margin-top: 32px; flex-wrap: wrap; }
+        .page-btn { padding: 6px 14px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;
+                    font-size: 0.9rem; background: #fff; transition: all .2s; }
+        .page-btn:hover:not(:disabled) { border-color: #333; }
+        .page-btn.active { background: #333; color: #fff; border-color: #333; }
+        .page-btn:disabled { opacity: .4; cursor: default; }
+
+        /* Filter bar */
+        .filter-bar { background: #fafafa; border: 1px solid #eee; border-radius: 8px;
+                      padding: 16px; margin-bottom: 24px; }
+        .filter-bar h4 { margin: 0 0 12px; font-size: 0.95rem; font-weight: 600; color: #333; }
+    </style>
+</head>
+<body class="bg-body" x-data="danhMucApp()" x-init="init()">
+
+    <header class="site-header">
+        <div class="top-header container-fluid">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Tech<span>No</span></div>
+            </a>
+            <div class="search-bar">
+                <input type="search" id="search-input" placeholder="Tìm kiếm sản phẩm..."
+                       x-model="searchTerm" @keyup.enter="applySearch()">
+                <button type="submit" aria-label="Tìm kiếm" @click="applySearch()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="header-actions">
+                <div class="action-item" id="show-login" x-data="{ loggedIn: !!localStorage.getItem('idKH'), name: localStorage.getItem('hoTen') || '' }">
+                    <template x-if="!loggedIn">
+                        <a href="login-register.html">
+                            <i class="fas fa-user"></i>
+                            <span class="action-label">Tài khoản</span>
+                        </a>
+                    </template>
+                    <template x-if="loggedIn">
+                        <a href="user-profile.html">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="action-label" x-text="name"></span>
+                        </a>
+                    </template>
+                </div>
+                <div class="action-item">
+                    <a href="yeuthich.html">
+                        <i class="far fa-heart"></i>
+                        <span class="action-label">Yêu thích</span>
+                        <span class="badge" id="wishlist-count">0</span>
+                    </a>
+                </div>
+                <div class="action-item">
+                    <a href="cart.html">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="action-label">Giỏ hàng</span>
+                        <span class="badge" id="cart-count">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <nav class="main-nav container-fluid">
+            <ul>
+                <li><a href="index.html" class="nav-link">Trang chủ</a></li>
+                <li><a href="about.html" class="nav-link">Giới thiệu</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link active">Sản phẩm <i class="fas fa-chevron-down fa-xs"></i></a>
+                    <div class="dropdown-content">
+                        <div class="category-group">
+                            <h3>Điện thoại & Tablet</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Điện thoại</a></li>
+                                <li><a href="danhmuc.html">Máy tính bảng</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện điện thoại</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Laptop & PC</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Laptop</a></li>
+                                <li><a href="danhmuc.html">Máy tính</a></li>
+                                <li><a href="danhmuc.html">Linh kiện PC</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện Laptop</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Thiết bị điện tử</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Tivi</a></li>
+                                <li><a href="danhmuc.html">Thiết bị âm thanh</a></li>
+                                <li><a href="danhmuc.html">Máy ảnh</a></li>
+                                <li><a href="danhmuc.html">Thiết bị đeo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li><a href="promotions.html" class="nav-link">Khuyến mãi</a></li>
+                <li><a href="new-products.html" class="nav-link">Sản phẩm mới</a></li>
+                <li><a href="news.html" class="nav-link">Tin công nghệ</a></li>
+                <li><a href="contact.html" class="nav-link">Liên hệ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container section-padding">
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" style="margin-bottom: var(--spacer-4);">
+                <ol class="breadcrumb" style="display:flex;gap:8px;font-size:0.9rem;color:#666;">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li style="color:#999;">/</li>
+                    <li><a href="danhmuc.html">Sản phẩm</a></li>
+                    <template x-if="selectedCategory">
+                        <li style="color:#999;">/</li>
+                    </template>
+                    <template x-if="selectedCategory">
+                        <li style="color:#333;" x-text="selectedCategory.tenDanhMuc"></li>
+                    </template>
+                </ol>
+            </nav>
+
+            <!-- Page title -->
+            <h1 class="page-title" style="text-align:center;margin-bottom:var(--spacer-4);"
+                x-text="selectedCategory ? selectedCategory.tenDanhMuc : 'Tất cả sản phẩm'"></h1>
+
+            <!-- Category tabs -->
+            <div class="category-tabs">
+                <button class="cat-tab" :class="{ active: !selectedCategoryId }" @click="selectCategory(null)">
+                    Tất cả
+                </button>
+                <template x-for="cat in categories" :key="cat.idDanhMuc">
+                    <button class="cat-tab"
+                            :class="{ active: selectedCategoryId === cat.idDanhMuc }"
+                            @click="selectCategory(cat.idDanhMuc)"
+                            x-text="cat.tenDanhMuc">
+                    </button>
+                </template>
+            </div>
+
+            <!-- Filter bar -->
+            <div class="filter-bar">
+                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;">
+                    <!-- Price filter -->
+                    <div>
+                        <span style="font-size:0.9rem;font-weight:600;margin-right:10px;">Giá:</span>
+                        <div class="price-filters" style="display:inline-flex;">
+                            <button class="price-btn" :class="{ active: priceRange === 'all' }"
+                                    @click="setPriceRange('all')">Tất cả</button>
+                            <button class="price-btn" :class="{ active: priceRange === 'under5' }"
+                                    @click="setPriceRange('under5')">Dưới 5 triệu</button>
+                            <button class="price-btn" :class="{ active: priceRange === '5to15' }"
+                                    @click="setPriceRange('5to15')">5 – 15 triệu</button>
+                            <button class="price-btn" :class="{ active: priceRange === 'over15' }"
+                                    @click="setPriceRange('over15')">Trên 15 triệu</button>
+                        </div>
+                    </div>
+                    <!-- Sort + count -->
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <span class="count-badge" x-text="filteredProducts.length + ' sản phẩm'"></span>
+                        <div>
+                            <label for="sort-by" style="font-size:0.9rem;margin-right:6px;">Sắp xếp:</label>
+                            <select id="sort-by" x-model="sortBy" @change="onSortChange()"
+                                    style="padding:6px 10px;border-radius:6px;font-size:0.9rem;border:1px solid #ddd;">
+                                <option value="newest">Mới nhất</option>
+                                <option value="price-asc">Giá tăng dần</option>
+                                <option value="price-desc">Giá giảm dần</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error state -->
+            <template x-if="error">
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p x-text="errorMessage"></p>
+                    <button @click="loadProducts()" style="margin-top:12px;padding:8px 20px;border:1px solid #e53935;color:#e53935;background:#fff;border-radius:6px;cursor:pointer;">
+                        Thử lại
+                    </button>
+                </div>
+            </template>
+
+            <!-- Skeleton loading -->
+            <template x-if="loading && !error">
+                <div class="product-grid">
+                    <template x-for="n in 8" :key="n">
+                        <div class="skeleton-card">
+                            <div class="skeleton skeleton-img"></div>
+                            <div class="skeleton skeleton-text" style="margin-top:10px;"></div>
+                            <div class="skeleton skeleton-text short"></div>
+                            <div class="skeleton skeleton-text" style="width:40%;"></div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Empty state -->
+            <template x-if="!loading && !error && pagedProducts.length === 0">
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <p>Không tìm thấy sản phẩm nào.</p>
+                </div>
+            </template>
+
+            <!-- Product grid -->
+            <template x-if="!loading && !error && pagedProducts.length > 0">
+                <div class="product-grid">
+                    <template x-for="product in pagedProducts" :key="product.idSp">
+                        <div class="product-card">
+                            <!-- Badge -->
+                            <div class="product-badge" :class="product.giaBan < 5000000 ? 'sale' : 'new'">
+                                <span x-text="product.giaBan < 5000000 ? 'SALE' : 'NEW'"></span>
+                            </div>
+                            <!-- Image -->
+                            <div class="product-image">
+                                <a :href="'product-detail.html?id=' + product.idSp">
+                                    <img :src="resolveImageUrl(product.hinhAnhUrls && product.hinhAnhUrls[0])"
+                                         :alt="product.tenSanPham"
+                                         loading="lazy"
+                                         onerror="this.src='https://placehold.co/300x200?text=No+Image'">
+                                </a>
+                                <div class="product-overlay">
+                                    <div class="product-actions">
+                                        <button class="action-btn" title="Thêm vào yêu thích"
+                                                @click="toggleWishlist(product)">
+                                            <i :class="isWishlisted(product.idSp) ? 'fas fa-heart' : 'far fa-heart'"
+                                               :style="isWishlisted(product.idSp) ? 'color:#e53935' : ''"></i>
+                                        </button>
+                                        <button class="action-btn" title="Thêm vào giỏ hàng"
+                                                @click="addToCart(product)">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Info -->
+                            <div class="product-info">
+                                <div class="product-category" x-text="product.tenDanhMuc"></div>
+                                <h3 class="product-title">
+                                    <a :href="'product-detail.html?id=' + product.idSp"
+                                       x-text="product.tenSanPham"></a>
+                                </h3>
+                                <div class="product-rating">
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                    <span class="rating-count">(4.5)</span>
+                                </div>
+                                <div class="product-price">
+                                    <span class="current-price" x-text="formatCurrency(product.giaBan)"></span>
+                                </div>
+                                <button class="btn btn-dark btn-add-to-cart" @click="addToCart(product)">
+                                    Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Pagination -->
+            <template x-if="!loading && !error && totalPages > 1">
+                <div class="pagination-wrap">
+                    <button class="page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <template x-for="p in totalPages" :key="p">
+                        <button class="page-btn" :class="{ active: currentPage === p }" @click="goToPage(p)"
+                                x-text="p"></button>
+                    </template>
+                    <button class="page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </template>
+
+        </div><!-- /container -->
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-top container">
+            <div class="footer-column">
+                <h3>Về TechNo</h3>
+                <ul>
+                    <li><a href="about.html">Giới thiệu</a></li>
+                    <li><a href="news.html">Tin công nghệ</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Chính sách</h3>
+                <ul>
+                    <li><a href="#">Chính sách bảo hành</a></li>
+                    <li><a href="#">Chính sách đổi trả</a></li>
+                    <li><a href="#">Chính sách giao hàng</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Hỗ trợ</h3>
+                <ul>
+                    <li><a href="#">Hướng dẫn mua hàng</a></li>
+                    <li><a href="order-tracking.html">Tra cứu đơn hàng</a></li>
+                </ul>
+            </div>
+            <div class="footer-column contact-info">
+                <h3>Liên hệ</h3>
+                <p><i class="fas fa-map-marker-alt"></i><span>1 Minimalist St, Design City, VN</span></p>
+                <p><i class="fas fa-phone"></i><a href="tel:18000000">1800 0000</a></p>
+                <p><i class="fas fa-envelope"></i><a href="mailto:support@techno.vn">support@techno.vn</a></p>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Youtube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>© <span id="current-year"></span> TechNo. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast notification -->
+    <div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+    <script>
+        const IMAGE_BASE_URL = 'http://localhost:8080/api/images/';
+
+        function resolveImageUrl(url) {
+            if (!url) return 'https://placehold.co/300x200?text=No+Image';
+            if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) return url;
+            return IMAGE_BASE_URL + url;
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? '#333' : type === 'error' ? '#e53935' : '#1976d2';
+            toast.style.cssText = `background:${bg};color:#fff;padding:12px 20px;border-radius:8px;font-size:0.9rem;
+                                   box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:300px;animation:fadeIn .3s;`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function danhMucApp() {
+            return {
+                // State
+                categories: [],
+                allProducts: [],          // sản phẩm gốc từ API (theo danh mục + sort)
+                filteredProducts: [],     // sau khi lọc giá + search
+                pagedProducts: [],        // trang hiện tại
+
+                selectedCategoryId: null,
+                selectedCategory: null,
+                sortBy: 'newest',
+                priceRange: 'all',
+                searchTerm: '',
+
+                currentPage: 1,
+                pageSize: 8,
+                totalPages: 1,
+
+                loading: false,
+                error: false,
+                errorMessage: '',
+
+                wishlist: [],
+                cart: [],
+
+                // ── Init ──────────────────────────────────────────────
+                async init() {
+                    document.getElementById('current-year').textContent = new Date().getFullYear();
+                    this.wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+                    this.cart     = JSON.parse(localStorage.getItem('cart')     || '[]');
+                    this.updateBadges();
+
+                    // Đọc ?categoryId=X từ URL nếu có
+                    const params = new URLSearchParams(window.location.search);
+                    const catId  = params.get('categoryId');
+
+                    await this.loadCategories();
+
+                    if (catId) {
+                        await this.selectCategory(parseInt(catId));
+                    } else {
+                        await this.loadProducts();
+                    }
+                },
+
+                // ── Load danh mục ────────────────────────────────────
+                async loadCategories() {
+                    try {
+                        const res = await axios.get('http://localhost:8080/api/danhmuc/active');
+                        this.categories = res.data;
+                    } catch (e) {
+                        console.error('Lỗi tải danh mục:', e);
+                    }
+                },
+
+                // ── Load sản phẩm ────────────────────────────────────
+                async loadProducts() {
+                    this.loading = true;
+                    this.error   = false;
+                    try {
+                        let url;
+                        if (this.selectedCategoryId) {
+                            url = `http://localhost:8080/api/sanpham/danhmuc/${this.selectedCategoryId}?sort=${this.sortBy}`;
+                        } else {
+                            url = `http://localhost:8080/api/sanpham/all?sort=${this.sortBy}`;
+                        }
+                        const res = await axios.get(url);
+                        this.allProducts = res.data;
+                        this.applyFilters();
+                    } catch (e) {
+                        this.error        = true;
+                        this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại.';
+                        console.error('Lỗi tải sản phẩm:', e);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                // ── Chọn danh mục ────────────────────────────────────
+                async selectCategory(id) {
+                    this.selectedCategoryId = id;
+                    this.selectedCategory   = id ? this.categories.find(c => c.idDanhMuc === id) || null : null;
+                    this.currentPage = 1;
+                    this.priceRange  = 'all';
+                    this.searchTerm  = '';
+                    // Cập nhật URL không reload trang
+                    const url = id ? `?categoryId=${id}` : '?';
+                    window.history.replaceState({}, '', url);
+                    await this.loadProducts();
+                },
+
+                // ── Sort thay đổi ────────────────────────────────────
+                async onSortChange() {
+                    this.currentPage = 1;
+                    await this.loadProducts();
+                },
+
+                // ── Lọc giá ─────────────────────────────────────────
+                setPriceRange(range) {
+                    this.priceRange  = range;
+                    this.currentPage = 1;
+                    this.applyFilters();
+                },
+
+                // ── Tìm kiếm trong trang ─────────────────────────────
+                applySearch() {
+                    this.currentPage = 1;
+                    this.applyFilters();
+                },
+
+                // ── Áp dụng bộ lọc giá + search ─────────────────────
+                applyFilters() {
+                    let result = [...this.allProducts];
+
+                    // Lọc giá
+                    if (this.priceRange === 'under5') {
+                        result = result.filter(p => p.giaBan < 5_000_000);
+                    } else if (this.priceRange === '5to15') {
+                        result = result.filter(p => p.giaBan >= 5_000_000 && p.giaBan <= 15_000_000);
+                    } else if (this.priceRange === 'over15') {
+                        result = result.filter(p => p.giaBan > 15_000_000);
+                    }
+
+                    // Lọc search
+                    const kw = this.searchTerm.trim().toLowerCase();
+                    if (kw) {
+                        result = result.filter(p =>
+                            p.tenSanPham.toLowerCase().includes(kw) ||
+                            (p.moTaNgan && p.moTaNgan.toLowerCase().includes(kw))
+                        );
+                    }
+
+                    this.filteredProducts = result;
+                    this.totalPages       = Math.max(1, Math.ceil(result.length / this.pageSize));
+                    if (this.currentPage > this.totalPages) this.currentPage = 1;
+                    this.updatePage();
+                },
+
+                // ── Phân trang ───────────────────────────────────────
+                updatePage() {
+                    const start = (this.currentPage - 1) * this.pageSize;
+                    this.pagedProducts = this.filteredProducts.slice(start, start + this.pageSize);
+                },
+
+                goToPage(page) {
+                    if (page < 1 || page > this.totalPages) return;
+                    this.currentPage = page;
+                    this.updatePage();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                // ── Format tiền ──────────────────────────────────────
+                formatCurrency(amount) {
+                    if (amount == null) return '';
+                    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+                },
+
+                // ── Wishlist ─────────────────────────────────────────
+                isWishlisted(idSp) {
+                    return this.wishlist.some(i => i.id === idSp);
+                },
+
+                toggleWishlist(product) {
+                    const idx = this.wishlist.findIndex(i => i.id === product.idSp);
+                    if (idx > -1) {
+                        this.wishlist.splice(idx, 1);
+                        showToast('Đã xóa khỏi yêu thích', 'info');
+                    } else {
+                        this.wishlist.push({
+                            id: product.idSp,
+                            name: product.tenSanPham,
+                            image: resolveImageUrl(product.hinhAnhUrls && product.hinhAnhUrls[0]),
+                            price: product.giaBan
+                        });
+                        showToast('Đã thêm vào yêu thích ❤️');
+                    }
+                    localStorage.setItem('wishlist', JSON.stringify(this.wishlist));
+                    this.updateBadges();
+                },
+
+                // ── Cart ─────────────────────────────────────────────
+                addToCart(product) {
+                    const existing = this.cart.find(i => i.id === product.idSp);
+                    if (existing) {
+                        existing.quantity = Math.min(existing.quantity + 1, 99);
+                    } else {
+                        this.cart.push({
+                            id: product.idSp,
+                            name: product.tenSanPham,
+                            image: resolveImageUrl(product.hinhAnhUrls && product.hinhAnhUrls[0]),
+                            price: product.giaBan,
+                            quantity: 1,
+                            product: product
+                        });
+                    }
+                    localStorage.setItem('cart', JSON.stringify(this.cart));
+                    this.updateBadges();
+                    showToast('Đã thêm vào giỏ hàng 🛒');
+                },
+
+                // ── Cập nhật badge header ────────────────────────────
+                updateBadges() {
+                    const wCount = document.getElementById('wishlist-count');
+                    const cCount = document.getElementById('cart-count');
+                    if (wCount) wCount.textContent = this.wishlist.length;
+                    if (cCount) cCount.textContent = this.cart.reduce((s, i) => s + i.quantity, 0);
+                }
+            };
+        }
+    </script>
+</body>
+</html>

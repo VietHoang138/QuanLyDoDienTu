@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng - TechNo</title>
+    <link rel="stylesheet" href="css/core-styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="icon" href="/IMAGES/lg.png">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Thêm Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Thêm Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Kiểm tra quyền admin -->
+    <script src="js/admin-auth.js"></script>
+    <!-- Script quản lý đơn hàng -->
+    <script src="js/order-admin.js"></script>
+    <style>
+        /* CSS cho trạng thái đơn hàng */
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        .status.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status.confirmed {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        .status.shipping {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status.completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.canceled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* CSS cho nút hành động */
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn.detail {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn.cancel {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        
+        /* CSS cho bảng đơn hàng */
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .order-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .order-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        
+        .order-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .order-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Responsive cho bảng */
+        @media (max-width: 1200px) {
+            .order-table th,
+            .order-table td {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+            
+            .order-table th:nth-child(2),
+            .order-table td:nth-child(2) {
+                max-width: 200px;
+                word-break: break-word;
+            }
+        }
+        
+        /* CSS cho thống kê và cards */
+        .stat-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .order-success-card {
+            transition: all 0.3s ease;
+        }
+        
+        .order-success-card:hover {
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2) !important;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            .order-success-card .grid-cols-2 {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        /* Animation cho loading */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fa-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        .order-success-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* CSS cho nút thử lại */
+        .retry-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+    </style>
+</head>
+<div class="bg-body">
+
+    <header class="site-header">
+        <div class="top-header container-fluid">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Tech<span>No</span></div>
+            </a>
+            <div class="search-bar">
+                <input type="search" id="search-input" placeholder="Tìm kiếm sản phẩm...">
+                <button type="submit" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="header-actions">
+                <a href="login-register.html">
+                    <div class="action-item" id="show-login" role="button" tabindex="0" aria-label="Mở menu tài khoản">
+                            <i class="fas fa-user"></i>
+                            <span class="action-label">Tài khoản</span>
+                    </div>
+                </a>
+                    <div class="action-item" id="show-wishlist" role="button" tabindex="0" aria-label="Xem danh sách yêu thích">
+                        <a href="yeuthich.html">
+                            <i class="far fa-heart"></i>
+                            <span class="action-label">Yêu thích</span>
+                            <span class="badge" id="wishlist-count">0</span>
+                        </a>
+                    </div>
+                    <div class="action-item" id="cart-icon" role="button" tabindex="0" aria-label="Mở giỏ hàng">
+                        <a href="cart.html">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="action-label">Giỏ hàng</span>
+                            <span class="badge" id="cart-count">0</span>
+                        </a>
+                    </div>
+                <div class="action-item" id="show-login">
+                    <a href="#" onclick="adminLogout(); return false;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="action-label">Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <nav class="main-nav container-fluid">
+            <ul>
+                <li><a href="index.html" class="nav-link active">Trang chủ</a></li>
+                <li><a href="about.html" class="nav-link">Giới thiệu</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">Sản phẩm <i class="fas fa-chevron-down fa-xs"></i></a>
+                    <div class="dropdown-content">
+                        <div class="category-group">
+                            <h3>Điện thoại & Tablet</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Điện thoại</a></li>
+                                <li><a href="danhmuc.html">Máy tính bảng</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện điện thoại</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Laptop & PC</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Laptop</a></li>
+                                <li><a href="danhmuc.html">Máy tính</a></li>
+                                <li><a href="danhmuc.html">Linh kiện PC</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện Laptop</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Thiết bị điện tử</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Tivi</a></li>
+                                <li><a href="danhmuc.html">Thiết bị âm thanh</a></li>
+                                <li><a href="danhmuc.html">Máy ảnh</a></li>
+                                <li><a href="danhmuc.html">Thiết bị đeo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li><a href="promotions.html" class="nav-link">Khuyến mãi</a></li>
+                <li><a href="new-products.html" class="nav-link">Sản phẩm mới</a></li> <!-- File này bạn cần bổ sung -->
+                <li><a href="news.html" class="nav-link">Tin công nghệ</a></li>
+                <li><a href="contact.html" class="nav-link">Liên hệ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <body>
+        <div class="wrapper"> 
+            <div class="sidebar">
+            <h2>Admin</h2>
+            <ul>
+                <li><a href="/admins.html"><span class="material-icons">add_box</span>Thêm sản phẩm</a></li>
+                <li><a href="adminSanPham.html"><span class="material-icons">inventory</span>Sản phẩm</a></li>
+                <li><a href="/UserAd.html"><span class="material-icons">people</span>Người dùng</a></li>
+                <li class="active"><a href="AdDH.html" style="color: #ffff"><span class="material-icons">inventory_2</span>Đơn hàng</a></li>
+            </ul>
+            </div>
+            <div class="main" style="padding: 20px;">
+                <div class="header">
+                <h2>Đơn hàng</h2>
+                
+                <!-- Debug Panel -->
+                <div id="debug-panel" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 10px; margin: 10px 0; font-size: 0.85em;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span>Trạng thái kết nối:</span>
+                        <span id="connection-status" style="padding: 2px 8px; border-radius: 4px; font-weight: 500;">
+                            <i class="fas fa-circle" style="font-size: 0.5em;"></i> Đang kiểm tra...
+                        </span>
+                        <button onclick="checkBackendConnection()" class="btn" style="background: #6c757d; color: white; padding: 4px 8px; font-size: 0.8em;">
+                            <i class="fas fa-sync"></i> Kiểm tra lại
+                        </button>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- Thống kê tổng quan -->
+                <div class="stats-overview" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div class="stat-card" style="background: #e8f5e8; padding: 20px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #2e7d32;">Tổng đơn hàng</h3>
+                        <p style="font-size: 2em; font-weight: bold; margin: 10px 0; color: #1b5e20;" id="total-orders">0</p>
+                    </div>
+                    <div class="stat-card" style="background: #e3f2fd; padding: 20px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #1976d2;">Đơn hàng thành công</h3>
+                        <p style="font-size: 2em; font-weight: bold; margin: 10px 0; color: #0d47a1;" id="success-orders">0</p>
+                    </div>
+                    <div class="stat-card" style="background: #fff3e0; padding: 20px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #f57c00;">Đang xử lý</h3>
+                        <p style="font-size: 2em; font-weight: bold; margin: 10px 0; color: #e65100;" id="pending-orders">0</p>
+                    </div>
+                    <div class="stat-card" style="background: #ffebee; padding: 20px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #d32f2f;">Đã hủy</h3>
+                        <p style="font-size: 2em; font-weight: bold; margin: 10px 0; color: #b71c1c;" id="canceled-orders">0</p>
+                    </div>
+                </div>
+
+                <!-- Thông tin chi tiết đơn hàng thành công -->
+                <div class="successful-orders-section" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px; color: #2e7d32;">Thông tin khách hàng đã đặt hàng thành công</h3>
+                    <div id="successful-orders-list" style="display: grid; gap: 20px;">
+                        <!-- Danh sách đơn hàng thành công sẽ được thêm vào đây -->
+                    </div>
+                </div>
+
+                <table class="order-table">
+                  <thead>
+                    <tr>
+                      <th>ID Đơn hàng</th>
+                      <th>Thông tin khách hàng</th>
+                      <th>Ngày đặt</th>
+                      <th>Trạng thái</th>
+                      <th>Tổng thanh toán</th>
+                      <th>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Dữ liệu đơn hàng sẽ được thêm vào đây từ JavaScript -->
+                  </tbody>
+                </table>
+
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px;">
+                    <strong>🔧 Debug Tools:</strong>
+                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="http://localhost:8080/api/sanpham" target="_blank" 
+                           style="background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em;">
+                            <i class="fas fa-external-link-alt"></i> Test /api/sanpham
+                        </a>
+                        <a href="http://localhost:8080/api/checkout/admin/orders" target="_blank" 
+                           style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85em;">
+                            <i class="fas fa-external-link-alt"></i> Test /api/checkout/admin/orders
+                        </a>
+                        <button onclick="testAPIConnection()" 
+                                style="background: #6f42c1; color: white; padding: 6px 12px; border-radius: 4px; border: none; font-size: 0.85em; cursor: pointer;">
+                            <i class="fas fa-flask"></i> Test Connection
+                        </button>
+                        <button onclick="showRawAPIResponse()" 
+                                style="background: #fd7e14; color: white; padding: 6px 12px; border-radius: 4px; border: none; font-size: 0.85em; cursor: pointer;">
+                            <i class="fas fa-code"></i> Show Raw Response
+                        </button>
+                    </div>
+                    <div id="api-test-result" style="margin-top: 10px; font-family: monospace; background: #000; color: #0f0; padding: 10px; border-radius: 4px; display: none; font-size: 0.8em;">
+                    </div>
+                </div>
+            </div>  
+        </div>
+      </body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng của bạn - TechNo</title>
+    <link rel="stylesheet" href="css/core-styles.css">
+     <link rel="stylesheet" href="css/QuanLyDH.css">
+     <link rel="icon" href="/IMAGES/lg.png">
+     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<div class="bg-body">
+
+    <header class="site-header">
+        <div class="top-header container-fluid">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Tech<span>No</span></div>
+            </a>
+            <div class="search-bar">
+                <input type="search" id="search-input" placeholder="Tìm kiếm sản phẩm...">
+                <button type="submit" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="header-actions">
+                <a href="login-register.html">
+                    <div class="action-item" id="show-login" role="button" tabindex="0" aria-label="Mở menu tài khoản">
+                            <i class="fas fa-user"></i>
+                            <span class="action-label">Tài khoản</span>
+                    </div>
+                </a>
+                    <div class="action-item" id="show-wishlist" role="button" tabindex="0" aria-label="Xem danh sách yêu thích">
+                        <a href="yeuthich.html">
+                            <i class="far fa-heart"></i>
+                            <span class="action-label">Yêu thích</span>
+                            <span class="badge" id="wishlist-count">0</span>
+                        </a>
+                    </div>
+                    <div class="action-item" id="cart-icon" role="button" tabindex="0" aria-label="Mở giỏ hàng">
+                        <a href="cart.html">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="action-label">Giỏ hàng</span>
+                            <span class="badge" id="cart-count">0</span>
+                        </a>
+                    </div>
+            </div>
+        </div>
+        <nav class="main-nav container-fluid">
+            <ul>
+                <li><a href="index.html" class="nav-link active">Trang chủ</a></li>
+                <li><a href="about.html" class="nav-link">Giới thiệu</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">Sản phẩm <i class="fas fa-chevron-down fa-xs"></i></a>
+                    <div class="dropdown-content">
+                        <div class="category-group">
+                            <h3>Điện thoại & Tablet</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Điện thoại</a></li>
+                                <li><a href="danhmuc.html">Máy tính bảng</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện điện thoại</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Laptop & PC</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Laptop</a></li>
+                                <li><a href="danhmuc.html">Máy tính</a></li>
+                                <li><a href="danhmuc.html">Linh kiện PC</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện Laptop</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Thiết bị điện tử</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Tivi</a></li>
+                                <li><a href="danhmuc.html">Thiết bị âm thanh</a></li>
+                                <li><a href="danhmuc.html">Máy ảnh</a></li>
+                                <li><a href="danhmuc.html">Thiết bị đeo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li><a href="promotions.html" class="nav-link">Khuyến mãi</a></li>
+                <li><a href="new-products.html" class="nav-link">Sản phẩm mới</a></li> <!-- File này bạn cần bổ sung -->
+                <li><a href="news.html" class="nav-link">Tin công nghệ</a></li>
+                <li><a href="contact.html" class="nav-link">Liên hệ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <body>
+        <div class="wrapper"> 
+            <div class="main" style="padding: 20px;">
+                <div class="header">
+                <h2>Đơn hàng của bạn</h2>
+                </div>
+                <table class="order-table">
+                    <thead>
+                      <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Thuộc tính</th>
+                        <th>Trạng thái</th>
+                        <th>Tổng tiền</th>
+                        <th>Phương thức thanh toán</th>
+                        <th>Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>DH001</td>
+                        <td>iPhone 15 Pro Max</td>
+                        <td>1</td>
+                        <td>Màu: Đen, Dung lượng: 256GB</td>
+                        <td><span class="status pending">Chờ xác nhận</span></td>
+                        <td>33,990,000 đ</td>
+                        <td>COD</td>
+                      </tr>
+                      <tr>
+                        <td>DH002</td>
+                        <td>Laptop Dell XPS 13</td>
+                        <td>2</td>
+                        <td>Màu: Bạc, RAM: 16GB</td>
+                        <td><span class="status shipping">Đang giao</span></td>
+                        <td>52,500,000 đ</td>
+                        <td>Chuyển khoản</td>
+                      </tr>
+                      <tr>
+                        <td>DH003</td>
+                        <td>Tai nghe Sony WH-1000XM5</td>
+                        <td>1</td>
+                        <td>Màu: Trắng</td>
+                        <td><span class="status completed">Đã giao</span></td>
+                        <td>8,900,000 đ</td>
+                        <td>COD</td>
+                      </tr>
+                    </tbody>
+                  </table>                  
+            </div>  
+        </div>
+      </body>
+</html>

@@ -1,0 +1,181 @@
+/*--------------------------------------------------------------
+# User Profile Page Specific Styles
+--------------------------------------------------------------*/
+
+.user-profile-layout {
+    display: grid;
+    grid-template-columns: 1fr; /* Default to 1 column */
+    gap: var(--spacer-5);
+    align-items: flex-start;
+}
+
+@media (min-width: 768px) { /* 2 columns on medium screens */
+    .user-profile-layout {
+        grid-template-columns: 250px 1fr; /* Sidebar fixed width, content fills space */
+        gap: var(--spacer-6);
+    }
+}
+
+.profile-sidebar {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacer-4);
+    background-color: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.user-avatar {
+    text-align: center;
+    margin-bottom: var(--spacer-4);
+    padding-bottom: var(--spacer-4);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.user-avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: var(--spacer-2);
+    border: 2px solid var(--black); /* Optional avatar border */
+}
+
+.user-avatar p {
+    font-weight: var(--font-weight-semibold);
+    color: var(--heading-color);
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.profile-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-nav li {
+    margin-bottom: var(--spacer-3);
+}
+
+.profile-nav a {
+    display: flex; /* Align icon and text */
+    align-items: center;
+    gap: var(--spacer-2);
+    text-decoration: none;
+    color: var(--body-color);
+    font-weight: var(--font-weight-medium);
+    padding: var(--spacer-2) 0;
+    border-radius: var(--border-radius-sm);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.profile-nav a i {
+    font-size: 1.1rem;
+}
+
+.profile-nav a:hover {
+    color: var(--black);
+    background-color: var(--gray-100);
+}
+
+.profile-nav a.active {
+    color: var(--black);
+    font-weight: var(--font-weight-semibold);
+}
+
+.profile-nav li:last-child {
+    margin-bottom: 0;
+    margin-top: var(--spacer-4); /* Space before logout */
+     border-top: 1px solid var(--border-color);
+     padding-top: var(--spacer-3);
+}
+
+.profile-nav li:last-child a {
+    color: var(--danger-color);
+}
+ .profile-nav li:last-child a:hover {
+     background-color: rgba(var(--danger-color-rgb), 0.1); /* Light red background */
+     color: var(--danger-color);
+ }
+
+
+.profile-content {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacer-5);
+    background-color: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacer-4);
+    padding-bottom: var(--spacer-3);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: var(--font-weight-semibold);
+}
+
+.profile-content .form-group {
+    margin-bottom: var(--spacer-4);
+}
+
+.profile-content label {
+    display: block;
+    margin-bottom: var(--spacer-2);
+    font-weight: var(--font-weight-medium);
+    color: var(--body-color);
+    font-size: 0.95rem;
+}
+
+.profile-content input[type="text"],
+.profile-content input[type="email"],
+.profile-content input[type="tel"],
+.profile-content input[type="date"] {
+    width: 100%;
+    padding: var(--spacer-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    color: var(--body-color);
+    background-color: var(--white);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.profile-content input:focus {
+    border-color: var(--black);
+    outline: none;
+    box-shadow: 0 0 0 0.1rem rgba(26, 26, 26, 0.1); /* Subtle black glow */
+}
+
+.profile-content input[disabled] {
+    background-color: var(--gray-100);
+    cursor: not-allowed;
+    border-color: var(--gray-300);
+}
+
+.profile-content button[type="submit"] {
+    margin-top: var(--spacer-3);
+}
+
+.order-history {
+    margin-top: var(--spacer-5);
+    padding-top: var(--spacer-4);
+    border-top: 1px solid var(--border-color);
+}
+
+.order-history h3 {
+    font-size: 1.2rem;
+    margin-bottom: var(--spacer-3);
+    font-weight: var(--font-weight-semibold);
+}
+
+.order-history p {
+    color: var(--gray-700);
+    margin-bottom: var(--spacer-2);
+}
+
+.order-history a {
+    color: var(--link-color);
+    text-decoration: underline;
+    font-weight: var(--font-weight-medium);
+}

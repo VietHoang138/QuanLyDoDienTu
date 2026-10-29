@@ -1,0 +1,100 @@
+/*--------------------------------------------------------------
+# Order Tracking Page Specific Styles
+--------------------------------------------------------------*/
+
+.order-tracking-container {
+    max-width: 600px;
+    margin: auto; /* Center the container */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacer-5);
+    background-color: var(--white);
+    box-shadow: var(--shadow-sm);
+    text-align: center; /* Center content within the container */
+}
+
+.order-tracking-container .page-title {
+    text-align: center;
+    margin-bottom: var(--spacer-4);
+    font-weight: var(--font-weight-semibold);
+}
+
+.order-tracking-container p {
+    margin-bottom: var(--spacer-4);
+    color: var(--gray-700);
+    font-size: 1rem;
+}
+
+#order-tracking-form {
+    width: 100%;
+}
+
+#order-tracking-form .form-group {
+    margin-bottom: var(--spacer-4);
+}
+
+#order-tracking-form label {
+    display: block;
+    margin-bottom: var(--spacer-2);
+    font-weight: var(--font-weight-medium);
+    color: var(--body-color);
+    font-size: 0.95rem;
+    text-align: left; /* Align label left */
+}
+
+#order-tracking-form input[type="text"] {
+    width: 100%;
+    padding: var(--spacer-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    color: var(--body-color);
+    background-color: var(--white);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    text-align: center; /* Center input text */
+}
+
+#order-tracking-form input[type="text"]:focus {
+    border-color: var(--black);
+    outline: none;
+    box-shadow: 0 0 0 0.1rem rgba(26, 26, 26, 0.1); /* Subtle black glow */
+}
+
+#order-tracking-form button[type="submit"] {
+    margin-top: var(--spacer-3);
+    display: block; /* Make button block */
+    width: 100%; /* Make button full width */
+}
+
+#tracking-results {
+    margin-top: var(--spacer-5);
+    padding-top: var(--spacer-4);
+    border-top: 1px solid var(--border-color);
+    text-align: left; /* Align results text left */
+    /* display: none;  Hidden by default, shown by JS */
+}
+
+#tracking-results h3 {
+    font-size: 1.3rem;
+    margin-bottom: var(--spacer-3);
+    font-weight: var(--font-weight-semibold);
+    color: var(--heading-color);
+}
+
+#tracking-results p {
+    margin-bottom: var(--spacer-2);
+    color: var(--gray-700);
+    font-size: 1rem;
+    text-align: left;
+}
+
+#tracking-results p strong {
+    color: var(--black);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .order-tracking-container {
+        padding: var(--spacer-4); /* Reduce padding on small screens */
+    }
+}

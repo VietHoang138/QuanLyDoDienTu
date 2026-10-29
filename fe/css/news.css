@@ -1,0 +1,145 @@
+/*--------------------------------------------------------------
+# News Page Specific Styles
+--------------------------------------------------------------*/
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacer-5);
+}
+
+.news-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.news-card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-5px);
+}
+
+.news-image-link img {
+    width: 100%;
+    height: 300px; /* Fixed height for consistency */
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+.news-card:hover .news-image-link img {
+    transform: scale(1.03);
+}
+
+
+.news-content {
+    padding: var(--spacer-4);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-meta {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-bottom: var(--spacer-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacer-3);
+}
+
+.news-meta span i {
+    margin-right: var(--spacer-1);
+    width: 1.1em; /* Ensure alignment */
+    text-align: center;
+}
+
+.news-title {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacer-3);
+    line-height: 1.4;
+    flex-grow: 1; /* Allow title to take space */
+    font-weight: var(--font-weight-semibold);
+}
+
+.news-title a {
+    color: var(--black);
+}
+
+.news-title a:hover {
+    color: var(--link-hover-color);
+}
+
+.news-excerpt {
+    color: var(--gray-700);
+    margin-bottom: var(--spacer-4);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    /* Clamp excerpt */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-card .btn {
+    margin-top: auto; /* Push button to bottom */
+    align-self: flex-start; /* Align button left */
+}
+
+/* News Detail Page (Basic structure) */
+.news-detail-header {
+    margin-bottom: var(--spacer-5);
+    padding-bottom: var(--spacer-4);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.news-detail-header .news-title { /* Larger title for detail page */
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    margin-bottom: var(--spacer-3);
+    text-align: left; /* Override center alignment */
+}
+
+.news-detail-header .news-meta {
+    font-size: 0.95rem;
+}
+
+.news-detail-image { /* Optional wrapper for main image */
+    margin-bottom: var(--spacer-5);
+}
+.news-detail-image img {
+     max-width: 100%;
+     height: auto;
+     border-radius: var(--border-radius-lg);
+}
+
+
+.news-detail-content {
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.news-detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: var(--spacer-4) 0;
+    border-radius: var(--border-radius);
+}
+
+.news-detail-content h2 {
+    font-size: 1.6rem;
+    margin-top: var(--spacer-5);
+    font-weight: var(--font-weight-semibold);
+}
+
+.news-detail-content h3 {
+    font-size: 1.3rem;
+    margin-top: var(--spacer-4);
+     font-weight: var(--font-weight-semibold);
+}
+/* Add more styles for blockquotes, lists, etc. if needed */

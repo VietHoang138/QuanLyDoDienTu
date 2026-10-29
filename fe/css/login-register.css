@@ -1,0 +1,200 @@
+/*--------------------------------------------------------------
+# Login/Register Page Specific Styles
+--------------------------------------------------------------*/
+
+.login-register-container {
+    max-width: 500px;
+    margin: 50px auto; /* Center the container */
+    padding: var(--spacer-5);
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.login-register-container .page-title {
+     text-align: center;
+     margin-bottom: var(--spacer-4);
+}
+
+
+.modal-tabs { /* Style for the tab buttons */
+    display: flex;
+    margin-bottom: var(--spacer-4);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-tabs .tab-btn {
+    flex-grow: 1; /* Make buttons take equal width */
+    padding: var(--spacer-3) var(--spacer-4);
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--gray-600);
+    border-bottom: 2px solid transparent;
+    transition: color var(--transition-fast), border-bottom-color var(--transition-fast);
+}
+
+.modal-tabs .tab-btn.active {
+    color: var(--black);
+    border-bottom-color: var(--black);
+}
+
+.modal-tabs .tab-btn:hover:not(.active) {
+    color: var(--gray-900);
+}
+
+.tab-content {
+    /* Styles for the content of each tab (form) */
+    /* Display handled by JS, but default hidden state */
+    display: none;
+}
+
+.tab-content.active {
+     display: block;
+}
+
+.form-group { /* Reusing form-group style from core-styles */
+    margin-bottom: var(--spacer-4);
+}
+
+.form-group label { /* Reusing label style from core-styles */
+     display: block;
+     margin-bottom: var(--spacer-2);
+     font-weight: var(--font-weight-medium);
+     color: var(--body-color);
+     font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="tel"] { /* Reusing input style from core-styles */
+    width: 100%;
+    padding: var(--spacer-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    color: var(--body-color);
+    background-color: var(--white);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-group input:focus {
+    border-color: var(--black);
+    outline: none;
+    box-shadow: 0 0 0 0.1rem rgba(26, 26, 26, 0.1); /* Subtle black glow */
+}
+
+
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacer-4);
+    font-size: 0.9rem;
+}
+
+.remember-me input[type="checkbox"] {
+    margin-right: var(--spacer-1);
+    accent-color: var(--black); /* Style checkbox */
+}
+
+.form-footer a {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+}
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+
+.btn-full { /* Reusing btn-full from core-styles */
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.social-login {
+    text-align: center;
+    margin-top: var(--spacer-5);
+    padding-top: var(--spacer-5);
+    border-top: 1px solid var(--border-color);
+}
+
+.social-login p {
+    font-size: 0.95rem;
+    color: var(--gray-700);
+    margin-bottom: var(--spacer-3);
+}
+
+.social-buttons {
+    display: flex;
+    gap: var(--spacer-3);
+    justify-content: center;
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    padding: var(--spacer-2) var(--spacer-4);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+     border: 1px solid var(--border-color); /* Add border */
+     background-color: var(--white);
+     color: var(--body-color); /* Default color */
+}
+
+.btn-social i {
+    font-size: 1.1rem;
+}
+
+.btn-social:hover {
+    opacity: 0.9;
+}
+
+.btn-google {
+     border-color: #db4437; /* Google Red */
+     color: #db4437;
+}
+ .btn-google:hover {
+     background-color: #db4437;
+     color: var(--white);
+ }
+
+.btn-facebook {
+     border-color: #4267b2; /* Facebook Blue */
+     color: #4267b2;
+}
+.btn-facebook:hover {
+    background-color: #4267b2;
+    color: var(--white);
+}
+
+
+.agree-terms {
+    margin-top: var(--spacer-4);
+    font-size: 0.9rem;
+    color: var(--gray-700);
+    display: flex;
+    align-items: flex-start; /* Align text with checkbox */
+}
+
+.agree-terms input[type="checkbox"] {
+     margin-right: var(--spacer-2);
+     accent-color: var(--black);
+     flex-shrink: 0; /* Prevent checkbox from shrinking */
+     margin-top: 3px; /* Align checkbox vertically */
+}
+
+.agree-terms label a {
+    color: var(--link-color);
+    text-decoration: underline;
+    font-weight: var(--font-weight-medium);
+}

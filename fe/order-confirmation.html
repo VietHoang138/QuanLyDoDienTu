@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đơn hàng - TechNo</title>
+    <link rel="stylesheet" href="css/core-styles.css">
+    <link rel="stylesheet" href="css/checkout.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/IMAGES/lg.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        .order-confirmation {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .order-success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            color: white;
+            font-size: 2.5rem;
+        }
+        
+        .order-details {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .order-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .order-detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .order-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-light" x-data="orderConfirmationApp()">
+    <header class="site-header checkout-header" style="border-bottom: 1px solid var(--border-color);">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: var(--spacer-3); padding-bottom: var(--spacer-3);">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Tech<span>No</span></div>
+            </a>
+            <div style="font-size: 1.2rem; font-weight: 500; color: var(--gray-700);">
+                <i class="fas fa-check-circle" style="margin-right: var(--spacer-2);"></i> Đặt hàng thành công
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container section-padding">
+            <div class="order-confirmation">
+                <div class="order-success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                
+                <h1 class="text-center mb-4">Cảm ơn bạn đã đặt hàng!</h1>
+                <p class="text-center mb-5">Đơn hàng của bạn đã được xác nhận và đang được xử lý.</p>
+                
+                <div class="order-details">
+                    <h2 class="mb-4">Chi tiết đơn hàng #<span x-text="orderDetails.donHangId"></span></h2>
+                    
+                    <div class="order-detail-row">
+                        <div>Tổng tiền sản phẩm:</div>
+                        <div x-text="formatCurrency(orderDetails.tongTienSanPham)"></div>
+                    </div>
+                    
+                    <div class="order-detail-row">
+                        <div>Phí vận chuyển:</div>
+                        <div x-text="formatCurrency(orderDetails.phiVanChuyen)"></div>
+                    </div>
+                    
+                    <div class="order-detail-row">
+                        <div>Giảm giá:</div>
+                        <div x-text="formatCurrency(orderDetails.tongTienGiamGia)"></div>
+                    </div>
+                    
+                    <div class="order-detail-row order-total">
+                        <div>Tổng thanh toán:</div>
+                        <div x-text="formatCurrency(orderDetails.tongThanhToan)"></div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <p>Chúng tôi đã gửi email xác nhận đơn hàng đến địa chỉ email của bạn.</p>
+                    <p>Bạn có thể theo dõi trạng thái đơn hàng trong trang <a href="account.html" class="text-decoration-underline">tài khoản</a> của mình.</p>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="index.html" class="btn btn-outline-dark">Tiếp tục mua sắm</a>
+                    <a href="account.html" class="btn btn-dark">Xem đơn hàng</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer checkout-footer" style="background-color: var(--white); border-top: 1px solid var(--border-color); padding: var(--spacer-4) 0; margin-top: var(--spacer-6);">
+        <div class="container" style="text-align: center; font-size: 0.85rem; color: var(--gray-600);">
+            <p>© <span id="current-year"></span> TechNo. All rights reserved. | <a href="policy.html" style="color: var(--gray-600);">Chính sách bảo mật</a> | <a href="terms.html" style="color: var(--gray-600);">Điều khoản dịch vụ</a></p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        function orderConfirmationApp() {
+            return {
+                orderDetails: {
+                    donHangId: '',
+                    tongTienSanPham: 0,
+                    phiVanChuyen: 0,
+                    tongTienGiamGia: 0,
+                    tongThanhToan: 0
+                },
+                
+                init() {
+                    this.loadOrderDetails();
+                },
+                
+                loadOrderDetails() {
+                    // Lấy thông tin đơn hàng từ localStorage
+                    const lastOrder = localStorage.getItem('lastOrder');
+                    if (lastOrder) {
+                        this.orderDetails = JSON.parse(lastOrder);
+                    } else {
+                        // Nếu không có thông tin trong localStorage, lấy từ query param
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const orderId = urlParams.get('order');
+                        
+                        if (orderId) {
+                            // Gọi API để lấy thông tin đơn hàng
+                            fetch(`http://localhost:8080/api/checkout/order/${orderId}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    this.orderDetails = {
+                                        donHangId: data.idDonHang,
+                                        tongTienSanPham: data.tongTienSanPham,
+                                        phiVanChuyen: data.phiVanChuyen,
+                                        tongTienGiamGia: data.tongTienGiamGia,
+                                        tongThanhToan: data.tongThanhToan
+                                    };
+                                })
+                                .catch(error => {
+                                    console.error('Error loading order details:', error);
+                                });
+                        } else {
+                            // Nếu không có thông tin đơn hàng, chuyển hướng về trang chủ
+                            window.location.href = 'index.html';
+                        }
+                    }
+                },
+                
+                formatCurrency(value) {
+                    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                }
+            };
+        }
+    </script>
+</body>
+</html> 

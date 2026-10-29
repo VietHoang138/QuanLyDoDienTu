@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test WebSocket Connection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 20px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 Test Kết Nối WebSocket</h1>
+        
+        <div id="status" class="status disconnected">
+            🔴 Chưa kết nối
+        </div>
+        
+        <div class="test-section">
+            <h3>Điều khiển kết nối</h3>
+            <button onclick="connectWebSocket()">Kết nối</button>
+            <button onclick="disconnectWebSocket()">Ngắt kết nối</button>
+            <button onclick="clearLog()">Xóa log</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test gửi thông báo</h3>
+            <button onclick="testProductAdded()">Test: Sản phẩm mới</button>
+            <button onclick="testProductUpdated()">Test: Cập nhật sản phẩm</button>
+            <button onclick="testProductDeleted()">Test: Xóa sản phẩm</button>
+            <button onclick="testReloadProducts()">Test: Reload danh sách</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Log kết nối</h3>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <!-- WebSocket Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+
+    <script>
+        let stompClient = null;
+        let isConnected = false;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('status');
+            isConnected = connected;
+            
+            if (connected) {
+                statusDiv.className = 'status connected';
+                statusDiv.innerHTML = '🟢 Đã kết nối WebSocket';
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = '🔴 Chưa kết nối WebSocket';
+            }
+        }
+
+        function connectWebSocket() {
+            if (isConnected) {
+                log('⚠️ Đã kết nối rồi!');
+                return;
+            }
+
+            try {
+                log('🔌 Đang kết nối WebSocket...');
+                
+                const socket = new SockJS('/ws');
+                stompClient = new StompJs.Client({
+                    webSocketFactory: () => socket,
+                    debug: (str) => log(`STOMP: ${str}`),
+                    onConnect: (frame) => {
+                        log('✅ WebSocket đã kết nối thành công!');
+                        updateStatus(true);
+                        
+                        // Subscribe để nhận thông báo
+                        stompClient.subscribe('/topic/products', (message) => {
+                            log(`📨 Nhận thông báo: ${message.body}`);
+                        });
+                        
+                        log('📡 Đã subscribe vào /topic/products');
+                    },
+                    onDisconnect: () => {
+                        log('🔌 WebSocket đã ngắt kết nối');
+                        updateStatus(false);
+                    },
+                    onStompError: (frame) => {
+                        log(`❌ STOMP Error: ${frame.headers.message}`);
+                        updateStatus(false);
+                    }
+                });
+                
+                stompClient.activate();
+                
+            } catch (error) {
+                log(`❌ Lỗi kết nối: ${error.message}`);
+                updateStatus(false);
+            }
+        }
+
+        function disconnectWebSocket() {
+            if (stompClient && isConnected) {
+                stompClient.deactivate();
+                log('🔌 Đã ngắt kết nối WebSocket');
+                updateStatus(false);
+            } else {
+                log('⚠️ Chưa có kết nối để ngắt!');
+            }
+        }
+
+        function sendTestMessage(type, data = null) {
+            if (!stompClient || !isConnected) {
+                log('❌ Chưa kết nối WebSocket!');
+                return;
+            }
+
+            const message = {
+                type: type,
+                data: data,
+                timestamp: Date.now(),
+                source: 'WEB_TEST'
+            };
+
+            try {
+                stompClient.publish({
+                    destination: '/topic/products',
+                    body: JSON.stringify(message)
+                });
+                log(`📡 Đã gửi thông báo: ${type}`);
+            } catch (error) {
+                log(`❌ Lỗi gửi thông báo: ${error.message}`);
+            }
+        }
+
+        function testProductAdded() {
+            const testProduct = {
+                idSp: 999,
+                tenSanPham: 'Sản phẩm test từ Web',
+                giaBan: 1000000,
+                soLuong: 10
+            };
+            sendTestMessage('PRODUCT_ADDED', testProduct);
+        }
+
+        function testProductUpdated() {
+            const testProduct = {
+                idSp: 999,
+                tenSanPham: 'Sản phẩm đã cập nhật',
+                giaBan: 1200000,
+                soLuong: 8
+            };
+            sendTestMessage('PRODUCT_UPDATED', testProduct);
+        }
+
+        function testProductDeleted() {
+            sendTestMessage('PRODUCT_DELETED', { productId: 999 });
+        }
+
+        function testReloadProducts() {
+            sendTestMessage('PRODUCTS_RELOAD');
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Auto connect khi load trang
+        window.onload = function() {
+            log('🚀 Trang test WebSocket đã load');
+            log('💡 Nhấn "Kết nối" để bắt đầu test');
+        };
+    </script>
+</body>
+</html> 

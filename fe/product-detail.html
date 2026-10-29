@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tên Sản Phẩm - TechNo</title>
+    <link rel="stylesheet" href="css/core-styles.css">
+    <link rel="stylesheet" href="css/product-detail.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/IMAGES/lg.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
+<body class="bg-body">
+
+    <header class="site-header">
+        <div class="top-header container-fluid">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Tech<span>No</span></div>
+            </a>
+            <div class="search-bar">
+                <input type="search" id="search-input" placeholder="Tìm kiếm sản phẩm...">
+                <button type="submit" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="header-actions">
+                <a href="login-register.html">
+                    <div class="action-item" id="show-login" role="button" tabindex="0" aria-label="Mở menu tài khoản">
+                            <i class="fas fa-user"></i>
+                            <span class="action-label">Tài khoản</span>
+                    </div>
+                </a>
+                    <div class="action-item" id="show-wishlist" role="button" tabindex="0" aria-label="Xem danh sách yêu thích">
+                        <a href="yeuthich.html">
+                            <i class="far fa-heart"></i>
+                            <span class="action-label">Yêu thích</span>
+                            <span class="badge" id="wishlist-count">1</span>
+                        </a>
+                    </div>
+                    <div class="action-item" id="cart-icon" role="button" tabindex="0" aria-label="Mở giỏ hàng">
+                        <a href="cart.html">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="action-label">Giỏ hàng</span>
+                            <span class="badge" id="cart-count">0</span>
+                        </a>
+                    </div>
+            </div>
+        </div>
+        <nav class="main-nav container-fluid">
+            <ul>
+                <li><a href="index.html" class="nav-link active">Trang chủ</a></li>
+                <li><a href="about.html" class="nav-link">Giới thiệu</a></li>
+                <li class="dropdown">
+                    <a href="#" class="nav-link">Sản phẩm <i class="fas fa-chevron-down fa-xs"></i></a>
+                    <div class="dropdown-content">
+                        <div class="category-group">
+                            <h3>Điện thoại & Tablet</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Điện thoại</a></li>
+                                <li><a href="danhmuc.html">Máy tính bảng</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện điện thoại</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Laptop & PC</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Laptop</a></li>
+                                <li><a href="danhmuc.html">Máy tính</a></li>
+                                <li><a href="danhmuc.html">Linh kiện PC</a></li>
+                                <li><a href="danhmuc.html">Phụ kiện Laptop</a></li>
+                            </ul>
+                        </div>
+                        <div class="category-group">
+                            <h3>Thiết bị điện tử</h3>
+                            <ul>
+                                <li><a href="danhmuc.html">Tivi</a></li>
+                                <li><a href="danhmuc.html">Thiết bị âm thanh</a></li>
+                                <li><a href="danhmuc.html">Máy ảnh</a></li>
+                                <li><a href="danhmuc.html">Thiết bị đeo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <li><a href="promotions.html" class="nav-link">Khuyến mãi</a></li>
+                <li><a href="new-products.html" class="nav-link">Sản phẩm mới</a></li> <!-- File này bạn cần bổ sung -->
+                <li><a href="news.html" class="nav-link">Tin công nghệ</a></li>
+                <li><a href="contact.html" class="nav-link">Liên hệ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <main>
+        <div class="container section-padding">
+             <nav aria-label="breadcrumb" style="margin-bottom: var(--spacer-4);">
+                <ol class="breadcrumb" style="display: flex; gap: var(--spacer-2); font-size: 0.9rem; color: var(--gray-600);">
+                    <li class="breadcrumb-item"><a href="main.html">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="category.html">Tên Danh Mục</a></li> <li class="breadcrumb-item active" aria-current="page">Tên Sản Phẩm</li>
+                </ol>
+            </nav>
+
+            <div class="product-detail-layout" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacer-6); align-items: flex-start;">
+
+                <div class="product-images">
+                    <div class="main-image" style="border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: var(--spacer-3); margin-bottom: var(--spacer-3); text-align: center;">
+                        <img src="https://placehold.co/500x500/f0f0f0/333333?text=Main+Product+Image" alt="Tên Sản Phẩm" id="main-product-image" style="max-width: 100%; height: auto; max-height: 500px; object-fit: contain;">
+                    </div>
+                </div>
+
+                <div class="product-summary">
+                    <h1 class="product-title" style="font-size: 1.8rem; margin-bottom: var(--spacer-3); line-height: 1.3;">Tên Sản Phẩm Rất Dài Để Kiểm Tra Xuống Dòng</h1>
+                     <div class="product-rating" style="justify-content: flex-start; margin-bottom: var(--spacer-3);">
+                         <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
+                         <span class="rating-count" style="margin-left: var(--spacer-2);">(35 đánh giá)</span>
+                         <span style="margin-left: var(--spacer-3); padding-left: var(--spacer-3); border-left: 1px solid var(--border-color);"><a href="#reviews" style="font-size: 0.9rem; color: var(--link-color);">Xem đánh giá</a></span>
+                     </div>
+                    <div class="product-price-details" style="font-size: 2rem; font-weight: var(--font-weight-bold); color: var(--black); margin-bottom: var(--spacer-3); display: flex; align-items: baseline; gap: var(--spacer-3);">
+                        <span class="current-price">29.990.000₫</span>
+                        <span class="old-price" style="font-size: 1.2rem; color: var(--gray-500); text-decoration: line-through; font-weight: normal;">34.990.000₫</span>
+                        <span class="discount-badge" style="font-size: 0.8rem; background-color: var(--danger-color); color: white; padding: 3px 8px; border-radius: var(--border-radius-sm); font-weight: normal;">-15%</span>
+                    </div>
+                    <div class="product-variations" style="margin-bottom: var(--spacer-4);">
+                        <div class="variation-group" style="margin-bottom: var(--spacer-3);">
+                            <label class="variation-title" style="font-weight: var(--font-weight-semibold); margin-bottom: var(--spacer-2); display: block; font-size: 0.9rem;">Màu sắc:</label>
+                            <div class="variation-options">
+                                <button class="variation-option selected" data-value="Titan tự nhiên" data-image="images/titan-tu-nhien.jpg">Titan tự nhiên</button>
+                                <button class="variation-option" data-value="Titan xanh"data-image="images/titan-xanh.jpg">Titan xanh</button>
+                                <button class="variation-option" data-value="Titan trắng"data-image="images/titan-trắng.jpg">Titan trắng</button>
+                                <button class="variation-option" data-value="Titan đen"data-image="images/titan-đen.jpg">Titan đen</button>
+                            </div>
+                        </div>
+                         <div class="variation-group">
+                            <label class="variation-title" style="font-weight: var(--font-weight-semibold); margin-bottom: var(--spacer-2); display: block; font-size: 0.9rem;">Dung lượng:</label>
+                            <div class="variation-options">
+                                <button class="variation-option" data-value="256GB">256GB</button>
+                                <button class="variation-option selected" data-value="512GB">512GB</button>
+                                <button class="variation-option" data-value="1TB">1TB</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-actions-group" style="display: flex; align-items: center; gap: var(--spacer-4); margin-bottom: var(--spacer-4);">
+                        <div class="product-quantity">
+                             <label for="product-quantity-input" class="variation-title" style="font-weight: var(--font-weight-semibold); margin-bottom: var(--spacer-2); display: block; font-size: 0.9rem;">Số lượng:</label>
+                            <div class="quantity-control">
+                                <button class="quantity-btn decrease-quantity" aria-label="Giảm số lượng">-</button>
+                                <input type="number" class="quantity-input" id="product-quantity-input" value="1" min="1" max="10" aria-label="Số lượng">
+                                <button class="quantity-btn increase-quantity" aria-label="Tăng số lượng">+</button>
+                            </div>
+                        </div>
+                         <button class="btn btn-dark btn-lg btn-add-to-cart-detail" data-product-id="1" style="flex-grow: 1; padding: 0.9rem 1.5rem; font-size: 1.1rem;">
+                            <i class="fas fa-shopping-bag"></i> Thêm vào giỏ
+                        </button>
+                        <button class="btn btn-outline-dark btn-lg btn-icon add-to-wishlist-detail" title="Thêm vào yêu thích" data-product-id="1" style="padding: 0.9rem; font-size: 1.2rem;">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+
+                     <div class="short-description" style="color: var(--gray-700); font-size: 0.95rem; line-height: 1.7; margin-bottom: var(--spacer-4); border-top: 1px solid var(--border-color); padding-top: var(--spacer-4);">
+                         <ul>
+                             <li>Màn hình Super Retina XDR 6.7 inch ProMotion</li>
+                             <li>Chip A17 Pro mạnh mẽ</li>
+                             <li>Hệ thống camera Pro đột phá</li>
+                             <li>Khung viền Titan siêu bền, siêu nhẹ</li>
+                         </ul>
+                     </div>
+
+                      <div class="share-product" style="display: flex; align-items: center; gap: var(--spacer-2); font-size: 0.9rem;">
+                        <span style="font-weight: 500;">Chia sẻ:</span>
+                        <a href="#" aria-label="Chia sẻ lên Facebook" style="color: var(--gray-600); font-size: 1.3rem;"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Chia sẻ lên Twitter" style="color: var(--gray-600); font-size: 1.3rem;"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Sao chép liên kết" style="color: var(--gray-600); font-size: 1.3rem;"><i class="fas fa-link"></i></a>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="product-details-tabs" style="margin-top: var(--spacer-6); border-top: 1px solid var(--border-color); padding-top: var(--spacer-5);">
+                <div class="tabs-nav" style="display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: var(--spacer-5);">
+                    <button class="tab-link active" data-tab="description" style="padding: var(--spacer-3) var(--spacer-4); font-size: 1.1rem; font-weight: 500; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px;">Mô tả sản phẩm</button>
+                    <button class="tab-link" data-tab="specs" style="padding: var(--spacer-3) var(--spacer-4); font-size: 1.1rem; font-weight: 500; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px;">Thông số kỹ thuật</button>
+                    <button class="tab-link" data-tab="reviews" style="padding: var(--spacer-3) var(--spacer-4); font-size: 1.1rem; font-weight: 500; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px;">Đánh giá (35)</button>
+                </div>
+                 <style> .tab-link.active { border-bottom-color: var(--black); color: var(--black); } </style>
+
+                <div class="tab-content active" id="description">
+                    <h2>Mô tả chi tiết sản phẩm</h2>
+                    <p>Đây là nơi chứa mô tả chi tiết về sản phẩm, bao gồm các tính năng nổi bật, công nghệ, thiết kế, v.v. Nội dung có thể dài và chứa hình ảnh, video nếu cần.</p>
+                    <img src="https://placehold.co/800x400/f0f0f0/333333?text=Product+Description+Image" alt="Mô tả sản phẩm" style="max-width: 100%; height: auto; margin-top: var(--spacer-3); border-radius: var(--border-radius);">
+                    </div>
+                <div class="tab-content" id="specs" style="display: none;">
+                    <h2>Thông số kỹ thuật</h2>
+                     <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: var(--spacer-3) var(--spacer-2); font-weight: 500; background-color: var(--gray-100); width: 30%;">Màn hình</td>
+                                <td style="padding: var(--spacer-3) var(--spacer-2);">Super Retina XDR OLED, 6.7 inch, ProMotion</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: var(--spacer-3) var(--spacer-2); font-weight: 500; background-color: var(--gray-100);">Vi xử lý</td>
+                                <td style="padding: var(--spacer-3) var(--spacer-2);">Apple A17 Pro</td>
+                            </tr>
+                             <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: var(--spacer-3) var(--spacer-2); font-weight: 500; background-color: var(--gray-100);">RAM</td>
+                                <td style="padding: var(--spacer-3) var(--spacer-2);">8 GB</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: var(--spacer-3) var(--spacer-2); font-weight: 500; background-color: var(--gray-100);">Camera sau</td>
+                                <td style="padding: var(--spacer-3) var(--spacer-2);">Chính 48 MP & Phụ 12 MP, 12 MP</td>
+                            </tr>
+                             </tbody>
+                    </table>
+                </div>
+                <div class="tab-content" id="reviews" style="display: none;">
+                    <h2>Đánh giá sản phẩm</h2>
+                    <p>Nội dung đánh giá của khách hàng sẽ hiển thị ở đây.</p>
+                    <button class="btn btn-dark">Viết đánh giá</button>
+                </div>
+                 <script>
+                     // Basic Tab switching logic
+                     document.querySelectorAll('.tab-link').forEach(button => {
+                         button.addEventListener('click', () => {
+                             const tabId = button.dataset.tab;
+                             document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+                             document.querySelectorAll('.tab-content').forEach(content => {
+                                 content.style.display = 'none';
+                                 content.classList.remove('active');
+                             });
+                             button.classList.add('active');
+                             const targetContent = document.getElementById(tabId);
+                             if(targetContent){
+                                targetContent.style.display = 'block';
+                                targetContent.classList.add('active');
+                             }
+                         });
+                     });
+                 </script>
+            </div>
+
+            <section class="related-products container section-padding" style="margin-top: var(--spacer-6); border-top: 1px solid var(--border-color); padding-top: var(--spacer-5); margin-bottom: -70px;">
+                <h2 class="section-title" style="text-align: left; padding-bottom: 0; margin-bottom: 0px;">Sản phẩm liên quan</h2>
+            </section>
+        </div>
+        <div class="related-products">
+            <div class="product-grid" id="category-products" style="margin-top: 20px;">
+                <div class="product-card" data-product-id="1">
+                    <div class="product-image">
+                        <a href="product-detail.html" aria-label="Xem chi tiết Tên Sản Phẩm 1">
+                            <img src="https://placehold.co/300x300/f0f0f0/333333?text=Product+1" alt="Tên Sản Phẩm 1" loading="lazy">
+                        </a>
+                        <span class="product-badge sale">Sale</span>
+                        <div class="product-overlay">
+                            <div class="product-actions">
+                                <button class="action-btn quick-view" title="Xem nhanh" data-product-id="1" aria-label="Xem nhanh Tên Sản Phẩm 1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn add-to-wishlist" title="Thêm vào yêu thích" data-product-id="1" aria-label="Thêm Tên Sản Phẩm 1 vào yêu thích">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">Điện thoại</div>
+                        <h3 class="product-title"><a href="product-detail.html">Tên Sản Phẩm Mẫu 1</a></h3>
+                        <div class="product-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-count">(15)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">15.990.000₫</span>
+                            <span class="old-price">17.990.000₫</span>
+                        </div>
+                        <button class="btn btn-dark btn-add-to-cart" data-product-id="1">Thêm vào giỏ</button>
+                    </div>
+                </div>
+            
+                <!-- Copy và thay đổi cho Product 2 đến 8 -->
+                <div class="product-card" data-product-id="2">
+                    <div class="product-image">
+                        <a href="product-detail.html"><img src="https://placehold.co/300x300/f0f0f0/333333?text=Product+2" alt="Tên Sản Phẩm 2"></a>
+                        <span class="product-badge sale">Sale</span>
+                        <div class="product-overlay">
+                            <div class="product-actions">
+                                <button class="action-btn quick-view"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn add-to-wishlist"><i class="far fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">Điện thoại</div>
+                        <h3 class="product-title"><a href="product-detail.html">Tên Sản Phẩm Mẫu 2</a></h3>
+                        <div class="product-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-count">(12)</span></div>
+                        <div class="product-price"><span class="current-price">13.990.000₫</span><span class="old-price">15.990.000₫</span></div>
+                        <button class="btn btn-dark btn-add-to-cart">Thêm vào giỏ</button>
+                    </div>
+                </div>
+                <div class="product-card" data-product-id="3">
+                    <div class="product-image">
+                        <a href="product-detail.html"><img src="https://placehold.co/300x300/f0f0f0/333333?text=Product+3" alt="Tên Sản Phẩm 3"></a>
+                        <div class="product-overlay">
+                            <div class="product-actions">
+                                <button class="action-btn quick-view"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn add-to-wishlist"><i class="far fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">Điện thoại</div>
+                        <h3 class="product-title"><a href="product-detail.html">Tên Sản Phẩm Mẫu 3</a></h3>
+                        <div class="product-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-count">(12)</span></div>
+                        <div class="product-price"><span class="current-price">14.990.000₫</span><span class="old-price">17.990.000₫</span></div>
+                        <button class="btn btn-dark btn-add-to-cart">Thêm vào giỏ</button>
+                    </div>
+                </div>
+                <div class="product-card" data-product-id="2">
+                    <div class="product-image">
+                        <a href="product-detail.html"><img src="https://placehold.co/300x300/f0f0f0/333333?text=Product+4" alt="Tên Sản Phẩm 2"></a>
+                        <span class="product-badge sale">Sale</span>
+                        <div class="product-overlay">
+                            <div class="product-actions">
+                                <button class="action-btn quick-view"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn add-to-wishlist"><i class="far fa-heart"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">Điện thoại</div>
+                        <h3 class="product-title"><a href="product-detail.html">Tên Sản Phẩm Mẫu 4</a></h3>
+                        <div class="product-rating"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><span class="rating-count">(12)</span></div>
+                        <div class="product-price"><span class="current-price">13.990.000₫</span><span class="old-price">15.990.000₫</span></div>
+                        <button class="btn btn-dark btn-add-to-cart">Thêm vào giỏ</button>
+                    </div>
+                </div>
+            </div>
+          
+    </main>
+
+    <footer class="site-footer">
+         <div class="footer-top container">
+            <div class="footer-column">
+                <h3>Về TechNo</h3>
+                <ul>
+                    <li><a href="about.html">Giới thiệu</a></li>
+                    <li><a href="stores.html">Hệ thống cửa hàng</a></li>
+                    <li><a href="careers.html">Tuyển dụng</a></li>
+                    <li><a href="news.html">Tin công nghệ</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Chính sách</h3>
+                <ul>
+                    <li><a href="policy.html">Chính sách bảo hành</a></li>
+                    <li><a href="policy.html">Chính sách đổi trả</a></li>
+                    <li><a href="policy.html">Chính sách giao hàng</a></li>
+                    <li><a href="policy.html">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Hỗ trợ</h3>
+                <ul>
+                    <li><a href="guide.html">Hướng dẫn mua hàng online</a></li>
+                    <li><a href="payment-methods.html">Phương thức thanh toán</a></li>
+                    <li><a href="faq.html">Câu hỏi thường gặp</a></li>
+                    <li><a href="order-tracking.html">Tra cứu đơn hàng</a></li>
+                </ul>
+            </div>
+            <div class="footer-column contact-info">
+                <h3>Liên hệ</h3>
+                <p><i class="fas fa-map-marker-alt"></i><span>1 Minimalist St, Design City, VN</span></p>
+                <p><i class="fas fa-phone"></i><a href="tel:18000000">1800 0000</a></p>
+                <p><i class="fas fa-envelope"></i><a href="mailto:support@monozone.vn">support@techno.vn</a></p>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Youtube"><i class="fab fa-youtube"></i></a>
+                    <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="Tiktok"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>© <span id="current-year"></span> TechNo. All rights reserved.</p>
+                <div class="payment-methods">
+                    <i class="fab fa-cc-visa" title="Visa"></i>
+                    <i class="fab fa-cc-mastercard" title="Mastercard"></i>
+                    <i class="fab fa-cc-jcb" title="JCB"></i>
+                    <i class="fas fa-money-bill-wave" title="Tiền mặt khi nhận hàng"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal" id="login-modal"></div>
+     <aside class="cart-sidebar" id="cart-sidebar"></aside>
+     <div class="overlay" id="overlay"></div>
+      <div class="toast-container" id="toast-container"></div>
+      <script src="js/product-detail.js"></script>
+    </body>
+</html>

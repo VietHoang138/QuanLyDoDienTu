@@ -1,0 +1,285 @@
+/*--------------------------------------------------------------
+# Checkout Page Specific Styles
+--------------------------------------------------------------*/
+
+/* Use light background for better form visibility */
+body.checkout-page { /* Add class="checkout-page" to body tag */
+    background-color: var(--gray-100);
+}
+
+/* Simplified checkout header */
+.site-header.checkout-header {
+    box-shadow: none;
+    border-bottom: 1px solid var(--border-color);
+}
+.site-header.checkout-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacer-3);
+    padding-bottom: var(--spacer-3);
+}
+.checkout-secure-indicator {
+    font-size: 1.1rem; /* Adjusted size */
+    font-weight: 500;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+}
+
+/* Checkout Layout */
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr; /* Default 1 column */
+    gap: var(--spacer-5); /* Reduced gap */
+}
+@media (min-width: 992px) {
+    .checkout-layout {
+        grid-template-columns: 60% 1fr; /* 2 columns on large screens */
+        gap: var(--spacer-6);
+    }
+    .order-summary-payment .order-summary { /* Make summary sticky */
+        position: sticky;
+        top: 100px; /* Adjust based on actual simplified header height */
+        max-height: calc(100vh - 120px); /* Prevent overlapping footer */
+        overflow-y: auto; /* Allow scrolling if needed */
+        padding-right: var(--spacer-2); /* Space for scrollbar */
+    }
+     .order-summary-payment .order-summary::-webkit-scrollbar { width: 6px; }
+     .order-summary-payment .order-summary::-webkit-scrollbar-thumb { background: var(--gray-300); }
+}
+
+.checkout-section {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacer-4); /* Reduced padding */
+    background-color: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+.checkout-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: var(--spacer-4);
+    padding-bottom: var(--spacer-3);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: var(--font-weight-semibold);
+}
+.checkout-section .form-group {
+    margin-bottom: var(--spacer-3);
+}
+
+/* Order Summary */
+.order-summary #checkout-cart-items {
+    max-height: 300px; /* Limit height if many items */
+    overflow-y: auto;
+    margin-bottom: var(--spacer-3);
+    padding-right: var(--spacer-2); /* Space for scrollbar */
+}
+/* Scrollbar for order items */
+.order-summary #checkout-cart-items::-webkit-scrollbar { width: 6px; }
+.order-summary #checkout-cart-items::-webkit-scrollbar-thumb { background: var(--gray-300); }
+
+.checkout-cart-item {
+    display: flex;
+    gap: var(--spacer-3);
+    align-items: center;
+    padding-bottom: var(--spacer-3);
+    margin-bottom: var(--spacer-3);
+    border-bottom: 1px solid var(--gray-200);
+}
+.checkout-cart-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+.checkout-cart-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    flex-shrink: 0;
+}
+.checkout-cart-item .item-details {
+    flex-grow: 1;
+    min-width: 0; /* Prevent overflow */
+}
+.checkout-cart-item .item-name {
+    font-weight: 500;
+    margin-bottom: var(--spacer-1);
+    font-size: 0.95rem;
+    /* Clamp title */
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.checkout-cart-item .item-name .quantity {
+    color: var(--gray-600);
+    font-size: 0.9em;
+}
+.checkout-cart-item .item-variation {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+.checkout-cart-item .item-price {
+    font-weight: 500;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    text-align: right;
+    margin-left: var(--spacer-2); /* Add space */
+}
+
+.order-totals div {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacer-2);
+    font-size: 0.95rem;
+    color: var(--gray-700);
+}
+.order-totals div span:last-child {
+    font-weight: 500;
+    color: var(--black);
+    text-align: right;
+}
+.order-totals .total-row {
+    margin-top: var(--spacer-3);
+    padding-top: var(--spacer-3);
+    border-top: 1px solid var(--border-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+.order-totals .total-row span { color: var(--black); }
+
+/* Coupon Form */
+#coupon-form {
+    display: flex;
+    gap: var(--spacer-2);
+    margin: var(--spacer-3) 0;
+    padding-top: var(--spacer-3);
+    border-top: 1px solid var(--border-color); /* Add separator */
+}
+#coupon-form input {
+    flex-grow: 1;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+    height: 38px; /* Match button height */
+}
+#coupon-form button {
+    white-space: nowrap;
+    flex-shrink: 0; /* Prevent button shrinking */
+}
+
+/* Payment Methods */
+.payment-options .payment-option {
+    padding: var(--spacer-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    margin-bottom: var(--spacer-3);
+    background-color: var(--white);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    cursor: pointer; /* Make whole area clickable */
+}
+.payment-options .payment-option:last-child {
+    margin-bottom: 0;
+}
+.payment-options .payment-option input[type="radio"] {
+    margin-right: var(--spacer-2);
+    accent-color: var(--black);
+    vertical-align: middle;
+    margin-top: -2px;
+    float: left; /* Position radio nicely */
+}
+.payment-options .payment-option label {
+    font-weight: 500;
+    display: block; /* Make label take full width */
+    margin-bottom: 0; /* Override default */
+    cursor: pointer;
+    margin-left: calc(1em + var(--spacer-3)); /* Space for radio */
+}
+.payment-options .payment-option label i,
+.payment-options .payment-option label img {
+    margin-right: var(--spacer-2);
+    vertical-align: middle;
+    color: var(--gray-700);
+}
+.payment-options .payment-option label img { height: 20px; }
+
+.payment-description {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    padding-left: calc(1em + var(--spacer-3)); /* Align with radio */
+    margin-top: var(--spacer-2);
+    display: none; /* Hide by default */
+    clear: both; /* Ensure it appears below float */
+}
+/* Show description when checked */
+.payment-options .payment-option input[type="radio"]:checked ~ label + .payment-description,
+.payment-options .payment-option input[type="radio"]:checked ~ .payment-description {
+    display: block;
+}
+.payment-options .payment-option:has(input[type="radio"]:checked) { /* Style selected option */
+    border-color: var(--black);
+    background-color: var(--gray-100);
+}
+
+/* Terms Agreement */
+.terms-agreement {
+    margin-top: var(--spacer-4);
+    font-size: 0.9rem;
+    color: var(--gray-700);
+    padding-top: var(--spacer-3);
+    border-top: 1px solid var(--border-color);
+}
+.terms-agreement input[type="checkbox"] {
+    margin-right: var(--spacer-2);
+    accent-color: var(--black);
+    vertical-align: middle;
+    margin-top: -2px;
+    float: left;
+}
+.terms-agreement label {
+    display: block;
+    margin-left: calc(1em + var(--spacer-3)); /* Space for checkbox */
+    margin-bottom: 0;
+}
+.terms-agreement a { color: var(--black); font-weight: 500; text-decoration: underline;}
+
+/* Place Order Button */
+.checkout-section button[type="submit"] { /* More specific selector */
+    margin-top: var(--spacer-4);
+}
+
+/* Simplified Checkout Footer */
+.site-footer.checkout-footer {
+    background-color: var(--gray-100); /* Match body */
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacer-4) 0;
+    margin-top: var(--spacer-6);
+}
+.site-footer.checkout-footer .container {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+.site-footer.checkout-footer p { margin-bottom: 0; }
+.site-footer.checkout-footer a {
+    color: var(--gray-600);
+    text-decoration: underline;
+}
+.site-footer.checkout-footer a:hover { color: var(--black); }
+
+
+/* Responsive Checkout */
+@media (max-width: 992px) {
+    .order-summary-payment .order-summary {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+}
+@media (max-width: 576px) {
+    .checkout-cart-item { align-items: flex-start; }
+    .checkout-cart-item .item-price { font-size: 0.9rem; margin-top: var(--spacer-1);}
+}
