@@ -4,48 +4,1116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theo dõi đơn hàng - TechNo</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" href="/IMAGES/lg.png">
+    <!-- Core styles -->
     <link rel="stylesheet" href="css/core-styles.css">
-     <link rel="stylesheet" href="css/order-tracking.css">
-     <link rel="icon" href="/IMAGES/lg.png">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
-<body class="bg-body">
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- SockJS + STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
 
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --success: #10b981;
+            --success-light: #ecfdf5;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-subtle: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.06), 0 8px 10px -6px rgba(0,0,0,0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Site Header ── */
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-link {
+            text-decoration: none;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: #2563eb;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .action-item:hover {
+            color: var(--text-main);
+        }
+
+        .notif-bell-btn {
+            position: relative;
+            background: #f1f5f9;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .notif-bell-btn:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .bell-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            box-shadow: 0 0 0 2px #fff;
+            animation: pulseBadge 2s infinite;
+        }
+
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* ── Main Nav ── */
+        .main-nav {
+            border-top: var(--border-width) solid var(--border-color);
+        }
+
+        .main-nav ul {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-nav li {
+            position: relative;
+        }
+
+        .nav-link {
+            display: block;
+            padding: var(--spacer-3) var(--spacer-4);
+            color: var(--gray-700);
+            font-weight: var(--font-weight-medium);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            position: relative;
+            white-space: nowrap;
+            transition: color var(--transition-fast), background-color var(--transition-fast);
+        }
+
+        .nav-link:hover,
+        .nav-link.active,
+        .dropdown:hover > .nav-link {
+            color: var(--black);
+            background-color: var(--gray-100);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: var(--spacer-4);
+            right: var(--spacer-4);
+            height: 2px;
+            background-color: var(--black);
+        }
+
+        .nav-link i.fa-xs {
+            font-size: 0.65em;
+            margin-left: var(--spacer-1);
+            vertical-align: middle;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            border: var(--border-width) solid var(--border-color);
+            border-top: none;
+            min-width: 800px;
+            width: max-content;
+            max-width: calc(100vw - 40px);
+            display: flex;
+            flex-wrap: nowrap;
+            gap: var(--spacer-4);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+            padding: var(--spacer-5);
+            z-index: var(--z-index-dropdown);
+            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content,
+        .dropdown:focus-within .dropdown-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        .category-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .category-group h3 {
+            font-size: 0.85rem;
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacer-3);
+            color: var(--black);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding-bottom: var(--spacer-2);
+            border-bottom: var(--border-width) solid var(--gray-200);
+            white-space: nowrap;
+        }
+
+        .category-group ul {
+            display: block;
+            margin-bottom: 0;
+            padding-left: 0;
+        }
+
+        .category-group ul li {
+            margin-bottom: var(--spacer-1);
+            list-style: none;
+        }
+
+        .category-group ul li a {
+            display: block;
+            padding: var(--spacer-1) 0;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            line-height: 1.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.2s ease, padding-left 0.2s ease;
+        }
+
+        .category-group ul li a:hover {
+            color: var(--black);
+            padding-left: 5px;
+        }
+
+        @media (max-width: 992px) {
+            .main-nav ul {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 5px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--gray-300) transparent;
+            }
+
+            .main-nav ul::-webkit-scrollbar {
+                height: 4px;
+            }
+
+            .main-nav ul::-webkit-scrollbar-thumb {
+                background-color: var(--gray-300);
+                border-radius: 10px;
+            }
+
+            .dropdown-content,
+            .dropdown:hover .dropdown-content,
+            .dropdown:focus-within .dropdown-content {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-nav {
+                padding-left: var(--spacer-3);
+                padding-right: var(--spacer-3);
+            }
+        }
+
+        /* ── Page Hero & Search Box ── */
+        .tracking-hero {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #ffffff;
+            padding: 48px 24px 64px;
+            text-align: center;
+            position: relative;
+        }
+
+        .tracking-hero h1 {
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .tracking-hero p {
+            color: #94a3b8;
+            font-size: 1.05rem;
+            max-width: 580px;
+            margin: 0 auto 32px;
+            line-height: 1.5;
+        }
+
+        .search-container {
+            max-width: 540px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box-form {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 50px;
+            padding: 6px 8px 6px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .search-box-form:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 35px rgba(59, 130, 246, 0.3);
+        }
+
+        .search-box-form i.fa-magnifying-glass {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+
+        .search-box-form input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 1rem;
+            color: var(--text-main);
+            background: transparent;
+        }
+
+        .search-box-form input::placeholder {
+            color: #94a3b8;
+        }
+
+        .btn-track {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-track:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .search-hints {
+            margin-top: 14px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .search-hints span {
+            color: #cbd5e1;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-left: 4px;
+        }
+
+        /* ── Main Tracking Area ── */
+        .tracking-content {
+            max-width: 860px;
+            margin: -32px auto 60px;
+            padding: 0 20px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Error Card */
+        .error-card {
+            background: #fff;
+            border-left: 4px solid var(--danger);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #991b1b;
+            font-size: 0.95rem;
+        }
+
+        /* ── Order Header Card ── */
+        .order-meta-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .order-title-group h2 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-code-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-family: ui-monospace, monospace;
+            font-size: 1rem;
+        }
+
+        .order-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Realtime indicator */
+        .rt-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .rt-pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25);
+            animation: dotGlow 1.8s infinite;
+        }
+
+        @keyframes dotGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* ── Stepper 4 bước trực quan ── */
+        .stepper-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 24px;
+        }
+
+        .stepper-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 36px;
+        }
+
+        .stepper-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .current-status-tag {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .stepper-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 20px 0 10px;
+        }
+
+        /* Connecting Bar */
+        .stepper-bar-bg {
+            position: absolute;
+            top: 24px;
+            left: 30px;
+            right: 30px;
+            height: 4px;
+            background: #e2e8f0;
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        .stepper-bar-fill {
+            position: absolute;
+            top: 24px;
+            left: 30px;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #059669);
+            z-index: 1;
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Step Nodes */
+        .step-node {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            text-align: center;
+        }
+
+        .step-circle {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #cbd5e1;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+
+        .step-node.done .step-circle {
+            border-color: #10b981;
+            background: #10b981;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        .step-node.active .step-circle {
+            border-color: #2563eb;
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2);
+            animation: pulseActiveStep 2s infinite;
+        }
+
+        @keyframes pulseActiveStep {
+            0%, 100% { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); }
+            50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.25); }
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 4px;
+            transition: color 0.2s;
+        }
+
+        .step-node.done .step-title {
+            color: #065f46;
+        }
+
+        .step-node.active .step-title {
+            color: #1e40af;
+            font-weight: 700;
+        }
+
+        .step-desc {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            max-width: 120px;
+            line-height: 1.35;
+        }
+
+        /* Cancelled Step State */
+        .canceled-banner {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            border-radius: var(--radius-md);
+            padding: 24px;
+            text-align: center;
+            color: #9f1239;
+        }
+
+        .canceled-banner i {
+            font-size: 2.8rem;
+            color: #e11d48;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .canceled-banner h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .canceled-banner p {
+            font-size: 0.9rem;
+            color: #be123c;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* ── Grid 2 Cột: Chi tiết đơn hàng + Lịch sử timeline ── */
+        .tracking-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-card-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-card-header .btn-icon-link {
+            border: none;
+            background: none;
+            color: var(--primary);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-card-header .btn-icon-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Detail Rows */
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            border-bottom: 1px dashed #f1f5f9;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-label i {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            width: 16px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text-main);
+            text-align: right;
+            max-width: 280px;
+            word-break: break-word;
+        }
+
+        .detail-total-row {
+            margin-top: 10px;
+            padding-top: 14px;
+            border-top: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-total-row .label {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .detail-total-row .amount {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #059669;
+        }
+
+        /* ── Modern Timeline ── */
+        .timeline-list {
+            position: relative;
+            padding-left: 28px;
+            margin-top: 10px;
+        }
+
+        .timeline-list::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: #e2e8f0;
+        }
+
+        .timeline-node {
+            position: relative;
+            margin-bottom: 22px;
+        }
+
+        .timeline-node:last-child {
+            margin-bottom: 0;
+        }
+
+        .tl-bullet {
+            position: absolute;
+            left: -28px;
+            top: 2px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #94a3b8;
+            box-shadow: 0 0 0 3px #ffffff;
+            transition: all 0.2s;
+        }
+
+        .timeline-node.latest .tl-bullet {
+            border-color: #10b981;
+            background: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .tl-body {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+        }
+
+        .timeline-node.latest .tl-body {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .tl-status-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .timeline-node.latest .tl-status-title {
+            color: #15803d;
+        }
+
+        .tl-timestamp {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ── Notification Slide-in Drawer ── */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(3px);
+            z-index: 999;
+        }
+
+        .notif-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 360px;
+            max-width: 90vw;
+            background: #ffffff;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .notif-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-top {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .drawer-top h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+        }
+
+        .user-notif-card {
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .user-notif-card:hover {
+            background: #f8fafc;
+        }
+
+        .user-notif-card.unread {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .notif-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        /* ── Floating Realtime Toast ── */
+        .toast-bubble {
+            position: fixed;
+            top: 85px;
+            right: 24px;
+            width: 340px;
+            max-width: calc(100vw - 40px);
+            background: #ffffff;
+            border: 1px solid #bbf7d0;
+            border-left: 5px solid var(--success);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+            z-index: 9999;
+            transform: translateX(380px);
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast-bubble.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-bubble-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .toast-bubble-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #15803d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-bubble-close {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* ── Footer ── */
+        .site-footer {
+            margin-top: auto;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0 20px;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            padding: 0 24px;
+        }
+
+        .footer-column h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 14px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column li {
+            margin-bottom: 8px;
+        }
+
+        .footer-column a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-column a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #f1f5f9;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .tracking-grid {
+                grid-template-columns: 1fr;
+            }
+            .stepper-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+                padding-left: 10px;
+            }
+            .stepper-bar-bg, .stepper-bar-fill {
+                display: none;
+            }
+            .step-node {
+                flex-direction: row;
+                text-align: left;
+                gap: 16px;
+            }
+            .step-circle {
+                margin-bottom: 0;
+            }
+            .step-desc {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body x-data="orderTracker()" x-init="init()">
+
+    <!-- ── Header ── -->
     <header class="site-header">
-        <div class="top-header container-fluid">
+        <div class="top-header">
             <a href="index.html" class="logo-link">
                 <div class="logo">Tech<span>No</span></div>
             </a>
-            <div class="search-bar">
-                <input type="search" id="search-input" placeholder="Tìm kiếm sản phẩm...">
-                <button type="submit" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
-            </div>
+
             <div class="header-actions">
-                <a href="login-register.html">
-                    <div class="action-item" id="show-login" role="button" tabindex="0" aria-label="Mở menu tài khoản">
-                            <i class="fas fa-user"></i>
-                            <span class="action-label">Tài khoản</span>
-                    </div>
+                <!-- Personal Notification Bell -->
+                <div class="notif-bell-btn" @click="showNotifPanel = true" title="Thông báo cá nhân">
+                    <i class="fas fa-bell"></i>
+                    <span class="bell-badge" x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount"></span>
+                </div>
+
+                <!-- Account -->
+                <a href="user-profile.html" class="action-item">
+                    <i class="fas fa-user-circle" style="font-size:1.2rem;"></i>
+                    <span x-text="userName || 'Tài khoản'"></span>
                 </a>
-                    <div class="action-item" id="show-wishlist" role="button" tabindex="0" aria-label="Xem danh sách yêu thích">
-                        <a href="yeuthich.html">
-                            <i class="far fa-heart"></i>
-                            <span class="action-label">Yêu thích</span>
-                            <span class="badge" id="wishlist-count">1</span>
-                        </a>
-                    </div>
-                    <div class="action-item" id="cart-icon" role="button" tabindex="0" aria-label="Mở giỏ hàng">
-                        <a href="cart.html">
-                            <i class="fas fa-shopping-bag"></i>
-                            <span class="action-label">Giỏ hàng</span>
-                            <span class="badge" id="cart-count">0</span>
-                        </a>
-                    </div>
+
+                <!-- Cart -->
+                <a href="cart.html" class="action-item">
+                    <i class="fas fa-bag-shopping" style="font-size:1.1rem;"></i>
+                    <span>Giỏ hàng</span>
+                    <span class="bell-badge" id="cart-count" style="position:static; margin-left:2px;">0</span>
+                </a>
             </div>
         </div>
+
         <nav class="main-nav container-fluid">
             <ul>
-                <li><a href="index.html" class="nav-link active">Trang chủ</a></li>
+                <li><a href="index.html" class="nav-link">Trang chủ</a></li>
                 <li><a href="about.html" class="nav-link">Giới thiệu</a></li>
                 <li class="dropdown">
                     <a href="#" class="nav-link">Sản phẩm <i class="fas fa-chevron-down fa-xs"></i></a>
@@ -79,99 +1147,579 @@
                     </div>
                 </li>
                 <li><a href="promotions.html" class="nav-link">Khuyến mãi</a></li>
-                <li><a href="new-products.html" class="nav-link">Sản phẩm mới</a></li> <!-- File này bạn cần bổ sung -->
+                <li><a href="new-products.html" class="nav-link">Sản phẩm mới</a></li>
                 <li><a href="news.html" class="nav-link">Tin công nghệ</a></li>
+                <li><a href="order-tracking.html" class="nav-link active">Tra cứu đơn hàng</a></li>
                 <li><a href="contact.html" class="nav-link">Liên hệ</a></li>
             </ul>
         </nav>
     </header>
 
+    <!-- ── Hero Banner with Search Box ── -->
+    <section class="tracking-hero">
+        <div style="max-width:1200px; margin:0 auto;">
+            <h1>Theo dõi hành trình đơn hàng</h1>
+            <p>Tra cứu tình trạng vận chuyển, thời gian giao hàng và lịch sử cập nhật theo thời gian thực.</p>
 
-    <main>
-        <div class="container section-padding">
-            <h1 class="page-title" style="text-align: center; margin-bottom: 30px;">Theo dõi đơn hàng</h1>
+            <div class="search-container">
+                <div class="search-box-form">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" x-model="inputOrderId" placeholder="Nhập mã đơn hàng của bạn (ví dụ: 1, 2, 3...)"
+                           @keyup.enter="searchOrder()">
+                    <button class="btn-track" @click="searchOrder()" :disabled="searching">
+                        <i class="fas fa-magnifying-glass" :class="searching ? 'fa-spin' : ''"></i>
+                        <span x-text="searching ? 'Đang tra cứu...' : 'Tra cứu ngay'"></span>
+                    </button>
+                </div>
 
-            <div class="order-tracking-container" style="max-width: 600px; margin: auto; border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 30px; background-color: var(--white); box-shadow: var(--shadow-sm);">
-                <p style="text-align: center; margin-bottom: 20px; color: var(--gray-700);">Nhập mã đơn hàng của bạn để theo dõi trạng thái giao hàng.</p>
-                <form id="order-tracking-form">
-                    <div class="form-group">
-                        <label for="order-code">Mã đơn hàng</label>
-                        <input type="text" id="order-code" name="order_code" required placeholder="Nhập mã đơn hàng của bạn">
-                    </div>
-                    <button type="submit" class="btn btn-dark btn-full mt-3">Theo dõi đơn hàng</button>
-                </form>
-
-                <div id="tracking-results" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color); display: none;">
-                    <h3>Thông tin đơn hàng #<span>[Mã đơn hàng]</span></h3>
-                    <p>Trạng thái: <strong>[Trạng thái hiện tại]</strong></p>
-                    <p>Dự kiến giao hàng: [Ngày dự kiến]</p>
-                    </div>
+                <div class="search-hints">
+                    Gợi ý mã mẫu:
+                    <span @click="inputOrderId='1'; searchOrder();">#DH001</span>,
+                    <span @click="inputOrderId='2'; searchOrder();">#DH002</span>,
+                    <span @click="inputOrderId='3'; searchOrder();">#DH003</span>
+                </div>
             </div>
         </div>
+    </section>
+
+    <!-- ── Main Tracking Workspace ── -->
+    <main class="tracking-content">
+        <!-- Error Message -->
+        <template x-if="searchError">
+            <div class="error-card">
+                <i class="fas fa-circle-exclamation" style="font-size:1.3rem;"></i>
+                <span x-text="searchError"></span>
+            </div>
+        </template>
+
+        <!-- Order Information Section -->
+        <template x-if="order">
+            <div>
+                <!-- Order Header Card -->
+                <div class="order-meta-card">
+                    <div class="order-title-group">
+                        <h2>
+                            <span>Đơn hàng</span>
+                            <span class="order-code-badge" x-text="'#DH' + String(order.idDonHang).padStart(3,'0')"></span>
+                        </h2>
+                        <div class="order-subtitle">
+                            <span><i class="fas fa-calendar-day" style="margin-right:4px;"></i> Đặt ngày: <strong x-text="formatDate(order.ngayDat)"></strong></span>
+                            <span>•</span>
+                            <span><i class="fas fa-user" style="margin-right:4px;"></i> <span x-text="order.thongTinKhachHang || 'Khách vãng lai'"></span></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="rt-status-pill" x-show="wsConnected">
+                            <span class="rt-pulse-dot"></span>
+                            <span>Cập nhật realtime</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ── 4-Step Progress Stepper ── -->
+                <div class="stepper-card">
+                    <div class="stepper-header">
+                        <h3>
+                            <i class="fas fa-route" style="color:var(--primary);"></i>
+                            <span>Tiến độ xử lý</span>
+                        </h3>
+                        <div class="current-status-tag">
+                            <i class="fas fa-circle-info" style="margin-right:4px;"></i>
+                            <span x-text="order.trangThai?.tenTrangThai || 'Đang cập nhật'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Active Steps 1 to 4 -->
+                    <template x-if="order.trangThai?.idTtdh !== 5">
+                        <div class="stepper-wrapper">
+                            <!-- Background connecting bar -->
+                            <div class="stepper-bar-bg"></div>
+                            <!-- Dynamic progress fill bar -->
+                            <div class="stepper-bar-fill" :style="'width:' + getProgressWidth() + '%'"></div>
+
+                            <template x-for="step in steps" :key="step.id">
+                                <div class="step-node" :class="getStepClass(step.id)">
+                                    <div class="step-circle">
+                                        <template x-if="getStepClass(step.id) === 'done'">
+                                            <i class="fas fa-check"></i>
+                                        </template>
+                                        <template x-if="getStepClass(step.id) !== 'done'">
+                                            <i :class="step.icon"></i>
+                                        </template>
+                                    </div>
+                                    <div class="step-title" x-text="step.name"></div>
+                                    <div class="step-desc" x-text="step.desc"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Canceled State Banner -->
+                    <template x-if="order.trangThai?.idTtdh === 5">
+                        <div class="canceled-banner">
+                            <i class="fas fa-ban"></i>
+                            <h4>Đơn hàng đã bị hủy</h4>
+                            <p>Đơn hàng này đã bị hủy bỏ bởi quản trị viên hoặc khách hàng. Nếu cần trợ giúp hoặc đặt lại đơn hàng, vui lòng liên hệ tổng đài hỗ trợ <strong>1800 0000</strong>.</p>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- ── Grid 2 Cột: Chi tiết đơn hàng + Lịch sử timeline ── -->
+                <div class="tracking-grid">
+                    <!-- Column 1: Order Details & Pricing -->
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <h3><i class="fas fa-receipt" style="color:var(--primary);"></i> Thông tin chi tiết</h3>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label"><i class="fas fa-hashtag"></i> Mã đơn</span>
+                            <span class="detail-value" style="font-family:monospace; color:var(--primary);" x-text="'#DH' + String(order.idDonHang).padStart(3,'0')"></span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label"><i class="fas fa-user"></i> Người nhận</span>
+                            <span class="detail-value" x-text="order.thongTinKhachHang || '—'"></span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label"><i class="fas fa-location-dot"></i> Nơi nhận</span>
+                            <span class="detail-value" x-text="parseAddress(order.ghiChuKhachHang)"></span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label"><i class="fas fa-box"></i> Tiền hàng</span>
+                            <span class="detail-value" x-text="formatCurrency(order.tongTienSanPham)"></span>
+                        </div>
+
+                        <div class="detail-row">
+                            <span class="detail-label"><i class="fas fa-truck"></i> Phí vận chuyển</span>
+                            <span class="detail-value" x-text="formatCurrency(order.phiVanChuyen)"></span>
+                        </div>
+
+                        <div class="detail-row" x-show="order.tongTienGiamGia > 0">
+                            <span class="detail-label"><i class="fas fa-tag"></i> Giảm giá</span>
+                            <span class="detail-value" style="color:var(--danger);" x-text="'− ' + formatCurrency(order.tongTienGiamGia)"></span>
+                        </div>
+
+                        <div class="detail-total-row">
+                            <span class="label">Tổng thanh toán</span>
+                            <span class="amount" x-text="formatCurrency(order.tongThanhToan)"></span>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Status Timeline -->
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <h3><i class="fas fa-clock-rotate-left" style="color:var(--primary);"></i> Lịch sử xử lý</h3>
+                            <button class="btn-icon-link" @click="loadHistory()">
+                                <i class="fas fa-rotate" :class="historyLoading ? 'fa-spin' : ''"></i>
+                                <span>Cập nhật</span>
+                            </button>
+                        </div>
+
+                        <template x-if="history.length === 0 && !historyLoading">
+                            <div style="padding:30px 10px;text-align:center;color:var(--text-muted);font-size:0.88rem;">
+                                <i class="fas fa-timeline" style="font-size:1.8rem;margin-bottom:8px;display:block;opacity:0.5;"></i>
+                                Chưa có nhật ký trạng thái
+                            </div>
+                        </template>
+
+                        <div class="timeline-list">
+                            <template x-for="(item, i) in history" :key="item.idLsDonHang || i">
+                                <div class="timeline-node" :class="{ 'latest': i === 0 }">
+                                    <div class="tl-bullet"></div>
+                                    <div class="tl-body">
+                                        <div class="tl-status-title" x-text="item.trangThai?.tenTrangThai || 'Cập nhật trạng thái'"></div>
+                                        <div class="tl-timestamp">
+                                            <i class="fas fa-clock" style="font-size:0.7rem;"></i>
+                                            <span x-text="formatDate(item.ngayTaoDon)"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </template>
     </main>
 
+    <!-- ── Notification Slide-in Drawer ── -->
+    <div class="drawer-overlay" x-show="showNotifPanel" x-transition.opacity @click="showNotifPanel = false"></div>
+    <div class="notif-drawer" :class="{ 'open': showNotifPanel }">
+        <div class="drawer-top">
+            <h4>
+                <i class="fas fa-bell" style="color:var(--primary);"></i>
+                <span>Thông báo của bạn</span>
+            </h4>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <button @click="markAllRead()" style="border:none;background:none;color:var(--primary);font-size:0.8rem;font-weight:600;cursor:pointer;">Đã đọc hết</button>
+                <button @click="showNotifPanel = false" style="border:none;background:#f1f5f9;border-radius:6px;width:28px;height:28px;cursor:pointer;"><i class="fas fa-xmark"></i></button>
+            </div>
+        </div>
+
+        <div class="drawer-content">
+            <template x-if="notifications.length === 0">
+                <div style="padding:40px 20px;text-align:center;color:var(--text-muted);font-size:0.88rem;">
+                    <i class="fas fa-bell-slash" style="font-size:2rem;color:#cbd5e1;margin-bottom:10px;display:block;"></i>
+                    Bạn chưa có thông báo nào
+                </div>
+            </template>
+
+            <template x-for="(n, i) in notifications" :key="i">
+                <div class="user-notif-card" :class="{ 'unread': !n.daDoc }" @click="markOneRead(n)">
+                    <i class="fas fa-box-open" style="color:var(--primary);margin-top:2px;"></i>
+                    <div style="flex:1;">
+                        <div style="font-size:0.85rem;font-weight:700;color:var(--text-main);" x-text="n.tieuDe"></div>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:3px;" x-text="n.noiDung"></div>
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;" x-text="formatDate(n.ngayGui)"></div>
+                    </div>
+                    <span class="notif-dot" x-show="!n.daDoc"></span>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- ── Realtime Toast Banner ── -->
+    <div class="toast-bubble" :class="{ 'show': rtToastVisible }">
+        <div class="toast-bubble-header">
+            <div class="toast-bubble-title">
+                <i class="fas fa-bell fa-shake"></i>
+                <span>Cập nhật đơn hàng</span>
+            </div>
+            <button class="toast-bubble-close" @click="rtToastVisible = false">&times;</button>
+        </div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.4;" x-text="rtToastMsg"></div>
+    </div>
+
+    <!-- ── Site Footer ── -->
     <footer class="site-footer">
-        <div class="footer-top container">
+        <div class="footer-top">
             <div class="footer-column">
                 <h3>Về TechNo</h3>
                 <ul>
-                    <li><a href="about.html">Giới thiệu</a></li>
-                    <li><a href="stores.html">Hệ thống cửa hàng</a></li>
-                    <li><a href="careers.html">Tuyển dụng</a></li>
-                    <li><a href="news.html">Tin công nghệ</a></li>
+                    <li><a href="about.html">Giới thiệu cửa hàng</a></li>
+                    <li><a href="news.html">Tin công nghệ mới nhất</a></li>
+                    <li><a href="promotions.html">Khuyến mãi hot</a></li>
                 </ul>
             </div>
             <div class="footer-column">
-                <h3>Chính sách</h3>
+                <h3>Hỗ trợ khách hàng</h3>
                 <ul>
-                    <li><a href="policy.html">Chính sách bảo hành</a></li>
-                    <li><a href="policy.html">Chính sách đổi trả</a></li>
-                    <li><a href="policy.html">Chính sách giao hàng</a></li>
-                    <li><a href="policy.html">Chính sách bảo mật</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3>Hỗ trợ</h3>
-                <ul>
-                    <li><a href="guide.html">Hướng dẫn mua hàng online</a></li>
-                    <li><a href="payment-methods.html">Phương thức thanh toán</a></li>
-                    <li><a href="faq.html">Câu hỏi thường gặp</a></li>
+                    <li><a href="#">Chính sách đổi trả</a></li>
                     <li><a href="order-tracking.html">Tra cứu đơn hàng</a></li>
+                    <li><a href="#">Bảo hành & sửa chữa</a></li>
                 </ul>
             </div>
-            <div class="footer-column contact-info">
-                <h3>Liên hệ</h3>
-                <p><i class="fas fa-map-marker-alt"></i><span>1 Minimalist St, Design City, VN</span></p>
-                <p><i class="fas fa-phone"></i><a href="tel:18000000">1800 0000</a></p>
-                <p><i class="fas fa-envelope"></i><a href="mailto:support@monozone.vn">support@monozone.vn</a></p>
-                <div class="social-links">
-                    <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
-                    <a href="https://tiktok.com" target="_blank"><i class="fab fa-tiktok"></i></a>
-                </div>
+            <div class="footer-column">
+                <h3>Liên hệ hỗ trợ</h3>
+                <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:8px;"><i class="fas fa-phone" style="margin-right:6px;color:var(--primary);"></i> 1800 0000 (Miễn phí)</p>
+                <p style="font-size:0.88rem;color:var(--text-secondary);"><i class="fas fa-envelope" style="margin-right:6px;color:var(--primary);"></i> support@techno.vn</p>
             </div>
         </div>
         <div class="footer-bottom">
-            <div class="container">
-                <p>© <span id="current-year"></span> TechNo. All rights reserved.</p>
-                <div class="payment-methods">
-                    <i class="fab fa-cc-visa"></i>
-                    <i class="fab fa-cc-mastercard"></i>
-                    <i class="fab fa-cc-jcb"></i>
-                    <i class="fas fa-money-bill-wave"></i>
-                </div>
-            </div>
+            <p>© <span id="current-year"></span> TechNo Vietnam. Nền tảng mua sắm thiết bị điện tử uy tín.</p>
         </div>
     </footer>
 
-    <div class="modal" id="login-modal"></div>
-     <div class="modal product-modal" id="quick-view-modal"></div>
-     <aside class="cart-sidebar" id="cart-sidebar"></aside>
-     <div class="overlay" id="overlay"></div>
-     <div class="toast-container" id="toast-container"></div>
+    <script>
+        function orderTracker() {
+            return {
+                // ── State ──────────────────────────────────────────────────
+                inputOrderId:   '',
+                order:          null,
+                history:        [],
+                searching:      false,
+                historyLoading: false,
+                searchError:    '',
 
-    <script src="script.js"></script>
+                // ── User / Notifications ───────────────────────────────────
+                userId:         null,
+                userName:       '',
+                notifications:  [],
+                unreadCount:    0,
+                showNotifPanel: false,
 
+                // ── WebSocket ──────────────────────────────────────────────
+                stompClient:    null,
+                wsConnected:    false,
+                currentSub:     null,
+
+                // ── Realtime Toast ─────────────────────────────────────────
+                rtToastVisible: false,
+                rtToastMsg:     '',
+                rtToastTimer:   null,
+
+                steps: [
+                    { id: 1, name: 'Chờ xử lý',       icon: 'fas fa-receipt',         desc: 'Đã tiếp nhận đơn hàng' },
+                    { id: 2, name: 'Đang xử lý',      icon: 'fas fa-boxes-packing',   desc: 'Đang chuẩn bị sản phẩm' },
+                    { id: 3, name: 'Đang giao hàng',  icon: 'fas fa-truck-fast',      desc: 'Đang trên đường giao' },
+                    { id: 4, name: 'Hoàn thành',     icon: 'fas fa-circle-check',    desc: 'Giao hàng thành công' },
+                ],
+
+                // ── Init ───────────────────────────────────────────────────
+                async init() {
+                    document.getElementById('current-year').textContent = new Date().getFullYear();
+                    this.userId   = localStorage.getItem('idKH');
+                    this.userName = localStorage.getItem('hoTen') || '';
+
+                    // Cập nhật số lượng giỏ hàng
+                    try {
+                        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                        const cEl = document.getElementById('cart-count');
+                        if (cEl) cEl.textContent = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+                    } catch (_) {}
+
+                    // Kết nối WebSocket
+                    this.connectWebSocket();
+
+                    // Tải thông báo cá nhân nếu đã đăng nhập
+                    if (this.userId) {
+                        await this.loadNotifications();
+                    }
+
+                    // Tự động tìm kiếm nếu URL có ?orderId=X
+                    const params = new URLSearchParams(window.location.search);
+                    const oid = params.get('orderId');
+                    if (oid) {
+                        this.inputOrderId = oid;
+                        await this.searchOrder();
+                    }
+                },
+
+                // ── Search Order ───────────────────────────────────────────
+                async searchOrder() {
+                    let raw = String(this.inputOrderId).trim().replace(/^#?DH0*/i, '');
+                    const id = parseInt(raw);
+                    if (!id || id < 1) {
+                        this.searchError = 'Vui lòng nhập mã đơn hàng hợp lệ (ví dụ: 1, 2, 3...).';
+                        return;
+                    }
+
+                    this.searching   = true;
+                    this.searchError = '';
+                    this.order       = null;
+                    this.history     = [];
+
+                    try {
+                        const res = await axios.get(`http://localhost:8080/api/checkout/order/${id}`);
+                        this.order = res.data;
+                        await this.loadHistory();
+
+                        // Đăng ký theo dõi đơn này qua WebSocket
+                        this.subscribeOrder(id);
+
+                        // Cập nhật URL trình duyệt
+                        window.history.replaceState({}, '', `?orderId=${id}`);
+                    } catch (e) {
+                        if (e.response?.status === 404) {
+                            this.searchError = `Không tìm thấy thông tin cho đơn hàng #DH${String(id).padStart(3,'0')}.`;
+                        } else {
+                            this.searchError = 'Không thể tải đơn hàng lúc này. Vui lòng kiểm tra lại kết nối mạng.';
+                        }
+                    } finally {
+                        this.searching = false;
+                    }
+                },
+
+                // ── Load History Timeline ──────────────────────────────────
+                async loadHistory() {
+                    if (!this.order) return;
+                    this.historyLoading = true;
+                    try {
+                        const res = await axios.get(
+                            `http://localhost:8080/api/checkout/order/${this.order.idDonHang}/history`
+                        );
+                        // Đảo ngược để mốc mới nhất hiển thị trên cùng
+                        this.history = (res.data || []).reverse();
+                    } catch (e) {
+                        console.warn('Lỗi khi tải lịch sử đơn:', e);
+                    } finally {
+                        this.historyLoading = false;
+                    }
+                },
+
+                // ── WebSocket Connection ───────────────────────────────────
+                connectWebSocket() {
+                    try {
+                        const socket = new SockJS('http://localhost:8080/ws');
+                        this.stompClient = new StompJs.Client({
+                            webSocketFactory: () => socket,
+                            reconnectDelay: 5000,
+                            onConnect: () => {
+                                this.wsConnected = true;
+                                console.log('✅ [Customer WS] Connected successfully');
+
+                                // Subscribe kênh khách hàng riêng nếu đã đăng nhập
+                                if (this.userId) {
+                                    this.subscribeCustomer(this.userId);
+                                }
+
+                                // Nếu đang xem đơn nào đó, đảm bảo đăng ký
+                                if (this.order?.idDonHang) {
+                                    this.subscribeOrder(this.order.idDonHang);
+                                }
+                            },
+                            onDisconnect: () => { this.wsConnected = false; },
+                            onStompError: () => { this.wsConnected = false; },
+                        });
+                        this.stompClient.activate();
+                    } catch (e) {
+                        console.error('Lỗi khởi tạo WS:', e);
+                    }
+                },
+
+                subscribeCustomer(idKH) {
+                    if (!this.stompClient?.connected) return;
+                    this.stompClient.subscribe(`/topic/orders/${idKH}`, (msg) => {
+                        this.handleStatusUpdate(JSON.parse(msg.body));
+                    });
+                },
+
+                subscribeOrder(orderId) {
+                    if (!this.stompClient?.connected) return;
+
+                    // Nếu khách hàng chưa đăng nhập hoặc xem đơn vãng lai:
+                    // lắng nghe kênh /topic/orders để nhận cập nhật trạng thái đơn này
+                    if (!this.userId) {
+                        if (this.currentSub) this.currentSub.unsubscribe();
+                        this.currentSub = this.stompClient.subscribe('/topic/orders', (msg) => {
+                            const data = JSON.parse(msg.body);
+                            if (data.donHangId === orderId) {
+                                this.handleStatusUpdate(data);
+                            }
+                        });
+                    }
+                },
+
+                async handleStatusUpdate(msg) {
+                    if (msg.type !== 'STATUS_UPDATED') return;
+                    if (!this.order || this.order.idDonHang !== msg.donHangId) return;
+
+                    // Cập nhật trạng thái hiển thị
+                    this.order.trangThai = { idTtdh: msg.trangThaiId, tenTrangThai: msg.tenTrangThai };
+
+                    // Tải lại lịch sử xử lý
+                    await this.loadHistory();
+
+                    // Hiển thị toast thông báo
+                    this.showToast(msg.message || `Đơn hàng của bạn đã chuyển sang: ${msg.tenTrangThai}`);
+
+                    // Âm thanh báo
+                    this.playChime();
+
+                    // Thêm vào danh sách thông báo
+                    this.notifications.unshift({
+                        tieuDe: `Đơn hàng #DH${String(msg.donHangId).padStart(3,'0')} cập nhật`,
+                        noiDung: msg.message || `Trạng thái mới: ${msg.tenTrangThai}`,
+                        ngayGui: new Date().toISOString(),
+                        daDoc: false,
+                    });
+                    this.unreadCount++;
+                },
+
+                showToast(msg) {
+                    this.rtToastMsg = msg;
+                    this.rtToastVisible = true;
+                    if (this.rtToastTimer) clearTimeout(this.rtToastTimer);
+                    this.rtToastTimer = setTimeout(() => { this.rtToastVisible = false; }, 6000);
+                },
+
+                playChime() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
+                        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.35);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.35);
+                    } catch (_) {}
+                },
+
+                // ── Load Notifications From DB ─────────────────────────────
+                async loadNotifications() {
+                    if (!this.userId) return;
+                    try {
+                        const res = await axios.get(
+                            `http://localhost:8080/api/checkout/notifications/${this.userId}`
+                        );
+                        this.notifications = res.data || [];
+
+                        const countRes = await axios.get(
+                            `http://localhost:8080/api/checkout/notifications/${this.userId}/unread-count`
+                        );
+                        this.unreadCount = countRes.data.unreadCount || 0;
+                    } catch (e) {
+                        console.warn('Không thể tải thông báo người dùng:', e);
+                    }
+                },
+
+                async markAllRead() {
+                    this.notifications.forEach(n => n.daDoc = true);
+                    this.unreadCount = 0;
+                    if (this.userId) {
+                        try {
+                            await axios.put(`http://localhost:8080/api/checkout/notifications/${this.userId}/mark-all-read`);
+                        } catch (_) {}
+                    }
+                },
+
+                async markOneRead(n) {
+                    if (!n.daDoc) {
+                        n.daDoc = true;
+                        this.unreadCount = Math.max(0, this.unreadCount - 1);
+                        if (n.idThongBao) {
+                            try {
+                                await axios.put(`http://localhost:8080/api/checkout/notifications/${n.idThongBao}/read`);
+                            } catch (_) {}
+                        }
+                    }
+                },
+
+                // ── Stepper UI Helpers ─────────────────────────────────────
+                getStepClass(stepId) {
+                    const cur = this.order?.trangThai?.idTtdh || 0;
+                    if (cur === 5) return 'canceled';
+                    if (stepId < cur) return 'done';
+                    if (stepId === cur) return 'active';
+                    return '';
+                },
+
+                getProgressWidth() {
+                    const cur = this.order?.trangThai?.idTtdh || 1;
+                    const map = { 1: 0, 2: 33, 3: 66, 4: 100 };
+                    return map[cur] ?? 0;
+                },
+
+                // ── Formatting Helpers ─────────────────────────────────────
+                formatCurrency(v) {
+                    if (!v) return '0đ';
+                    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 })
+                                  .format(v).replace('₫', 'đ');
+                },
+
+                formatDate(d) {
+                    if (!d) return '—';
+                    const dt = new Date(d);
+                    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+                },
+
+                parseAddress(ghiChu) {
+                    if (!ghiChu) return 'Chưa cập nhật';
+                    const m = ghiChu.match(/Địa chỉ:\s*([^.]+)/i);
+                    return m ? m[1].trim() : ghiChu;
+                },
+            };
+        }
+    </script>
 </body>
 </html>

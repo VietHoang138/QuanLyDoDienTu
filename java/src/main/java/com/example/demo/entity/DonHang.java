@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DonHang {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +22,7 @@ public class DonHang {
 
     @ManyToOne
     @JoinColumn(name = "KhachHangId")
+    @JsonIgnoreProperties({"taiKhoans", "matKhau", "hibernateLazyInitializer", "handler"})
     private KhachHang khachHang;
 
     @Column(name = "TongTienSanPham")
@@ -40,18 +43,22 @@ public class DonHang {
 
     @ManyToOne
     @JoinColumn(name = "TrangThaiId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private TrangThaiDonHang trangThai;
 
     @ManyToOne
     @JoinColumn(name = "PtttId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private PhuongThucThanhToan phuongThucThanhToan;
 
     @ManyToOne
     @JoinColumn(name = "PtvcId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private PhuongThucVanChuyen phuongThucVanChuyen;
 
     @ManyToOne
     @JoinColumn(name = "DiaChiGiaoHangId")
+    @JsonIgnoreProperties({"khachHang", "hibernateLazyInitializer", "handler"})
     private DiaChiGiaoHang diaChiGiaoHang;
 
     @Column(name = "GhiChuKhachHang")
@@ -62,5 +69,6 @@ public class DonHang {
 
     @ManyToOne
     @JoinColumn(name = "MaKM")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private MaKhuyenMai maKhuyenMai;
-} 
+}

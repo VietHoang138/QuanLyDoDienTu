@@ -46,6 +46,22 @@ public class SanPhamService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    public List<String> formatHinhAnhUrls(List<String> rawUrls) {
+        if (rawUrls == null) return new ArrayList<>();
+        List<String> formatted = new ArrayList<>();
+        for (String url : rawUrls) {
+            if (url != null && !url.trim().isEmpty()) {
+                String trimmed = url.trim();
+                if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+                    formatted.add(trimmed);
+                } else {
+                    formatted.add("http://localhost:8080/api/images/" + trimmed);
+                }
+            }
+        }
+        return formatted;
+    }
+
 
     //API lấy danh sách tìm kiếm sản phẩm
     @Transactional(readOnly = true)
@@ -76,7 +92,7 @@ public class SanPhamService {
             
             // Lấy danh sách hình ảnh cho sản phẩm
             List<String> hinhAnhUrls = sanPhamHinhAnhRepository.findHinhAnhUrlsByIdSp(dto.getIdSp());
-            dto.setHinhAnhUrls(hinhAnhUrls);
+            dto.setHinhAnhUrls(formatHinhAnhUrls(hinhAnhUrls));
             
             sanPhamDTOList.add(dto);
         }
@@ -112,7 +128,7 @@ public class SanPhamService {
             
             // Lấy danh sách hình ảnh cho sản phẩm
             List<String> hinhAnhUrls = sanPhamHinhAnhRepository.findHinhAnhUrlsByIdSp(dto.getIdSp());
-            dto.setHinhAnhUrls(hinhAnhUrls);
+            dto.setHinhAnhUrls(formatHinhAnhUrls(hinhAnhUrls));
             
             sanPhamDTOList.add(dto);
         }
@@ -258,7 +274,7 @@ public class SanPhamService {
 
                 // Lấy danh sách hình ảnh
                 List<String> hinhAnhUrls = sanPhamHinhAnhRepository.findHinhAnhUrlsByIdSp(id);
-                dto.setHinhAnhUrls(hinhAnhUrls);
+                dto.setHinhAnhUrls(formatHinhAnhUrls(hinhAnhUrls));
 
                 return Optional.of(dto);
             }
@@ -298,7 +314,7 @@ public class SanPhamService {
             
             // Lấy danh sách hình ảnh cho sản phẩm
             List<String> hinhAnhUrls = sanPhamHinhAnhRepository.findHinhAnhUrlsByIdSp(dto.getIdSp());
-            dto.setHinhAnhUrls(hinhAnhUrls);
+            dto.setHinhAnhUrls(formatHinhAnhUrls(hinhAnhUrls));
             
             sanPhamDTOList.add(dto);
         }

@@ -117,7 +117,7 @@ public class SanPhamController {
         
         // Lấy hình ảnh
         List<String> hinhAnhUrls = sanPhamHinhAnhRepository.findHinhAnhUrlsByIdSp(sanPham.getIdSp());
-        dto.setHinhAnhUrls(hinhAnhUrls);
+        dto.setHinhAnhUrls(sanPhamService.formatHinhAnhUrls(hinhAnhUrls));
         
         return dto;
     }

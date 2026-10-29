@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,14 +34,17 @@ public class SanPham {
 
     @ManyToOne
     @JoinColumn(name = "DanhMucChaId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private SanPhamDanhMucCha danhMucCha;
 
     @ManyToOne
     @JoinColumn(name = "DanhMucConId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DanhMuc danhMucCon;
 
     @ManyToOne
     @JoinColumn(name = "ThuongHieuId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ThuongHieu thuongHieu;
 
     @Column(name = "BaoHanh", length = 100)
@@ -53,15 +58,18 @@ public class SanPham {
 
     @ManyToOne
     @JoinColumn(name = "MauSac")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private SanPhamMauSac mauSac;
 
     @ManyToOne
     @JoinColumn(name = "DungLuong")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private SanPhamDungLuong dungLuong;
 
     @Column(name = "TrangThai", nullable = false)
     private Boolean trangThai = true;
 
     @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"sanPham", "hibernateLazyInitializer", "handler"})
     private List<SanPhamHinhAnh> hinhAnhList;
 } 

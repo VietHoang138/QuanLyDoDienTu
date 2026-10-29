@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SanPhamHinhAnh {
     
     @Id
@@ -19,11 +21,13 @@ public class SanPhamHinhAnh {
     
     @ManyToOne
     @JoinColumn(name = "IdSP", nullable = false)
+    @JsonIgnoreProperties({"hinhAnhList", "danhMucCha", "danhMucCon", "thuongHieu",
+                            "mauSac", "dungLuong", "hibernateLazyInitializer", "handler"})
     private SanPham sanPham;
     
     @Column(name = "LienKet", nullable = false, length = 255)
-    private String hinhAnh;  // Lưu URL của hình ảnh
+    private String hinhAnh;
     
     @Column(name = "MoTa", length = 255)
     private String moTa;
-} 
+}
