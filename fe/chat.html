@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hỗ trợ trực tuyến - TechNo</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" href="/IMAGES/lg.png">
+    <link rel="stylesheet" href="css/core-styles.css">
+
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- SockJS + STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Site Header ── */
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span { color: var(--primary); }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 24px;
+            overflow-x: auto;
+        }
+
+        .main-nav a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .main-nav a:hover, .main-nav a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ── Chat Container ── */
+        .chat-app-container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06);
+            overflow: hidden;
+            height: 720px;
+        }
+
+        /* Sidebar: Session History & Info */
+        .chat-sidebar {
+            border-right: 1px solid var(--border-color);
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-sidebar-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-sidebar-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-new-chat {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-new-chat:hover {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .session-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .session-item {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .session-item:hover {
+            background: #f8fafc;
+        }
+
+        .session-item.active {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .session-item-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .session-id {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .session-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .session-badge.waiting { background: #fef3c7; color: #b45309; }
+        .session-badge.open { background: #dcfce7; color: #15803d; }
+        .session-badge.closed { background: #f1f5f9; color: #64748b; }
+
+        .session-preview {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Main Chat Window */
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+        }
+
+        .chat-room-header {
+            padding: 16px 24px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .room-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .room-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .room-title h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .room-status {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.connected { background: var(--success); }
+        .status-dot.waiting { background: var(--warning); }
+        .status-dot.closed { background: var(--text-muted); }
+
+        .room-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-end-session {
+            background: #fff;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-end-session:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        /* Message feed */
+        .messages-container {
+            flex: 1;
+            padding: 20px 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .chat-bubble-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+        }
+
+        .chat-bubble-row.customer {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .chat-bubble-row.customer .bubble {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #ffffff;
+            border-radius: 18px 18px 4px 18px;
+        }
+
+        .chat-bubble-row.admin {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .chat-bubble-row.admin .bubble {
+            background: #ffffff;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 18px 18px 18px 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .chat-bubble-row.admin .sender-label {
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            margin-left: 6px;
+        }
+
+        .bubble {
+            padding: 12px 18px;
+            font-size: 0.92rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .bubble-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        .system-pill {
+            align-self: center;
+            background: #f1f5f9;
+            color: var(--text-secondary);
+            border: 1px solid #e2e8f0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        /* Input Bar */
+        .chat-input-section {
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+        }
+
+        .quick-suggestions {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            padding-bottom: 4px;
+        }
+
+        .suggestion-tag {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .suggestion-tag:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .chat-form {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            font-size: 0.95rem;
+            outline: none;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .message-input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-send {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-send:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        /* Closed Session Alert */
+        .closed-alert {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: #be123c;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .chat-layout {
+                grid-template-columns: 1fr;
+                height: 620px;
+            }
+            .chat-sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body x-data="customerChatPage()" x-init="init()">
+
+    <!-- ── Header ── -->
+    <header class="site-header">
+        <div class="top-header">
+            <a href="index.html" style="text-decoration:none;"><div class="logo">Tech<span>No</span></div></a>
+            <div style="font-size:0.9rem;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-headset" style="color:var(--primary);"></i>
+                <span>Trung tâm tư vấn & hỗ trợ khách hàng</span>
+            </div>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="about.html">Giới thiệu</a></li>
+                <li><a href="danhmuc.html">Sản phẩm</a></li>
+                <li><a href="order-tracking.html">Tra cứu đơn hàng</a></li>
+                <li><a href="chat.html" class="active">Hỗ trợ trực tuyến</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- ── Main Chat App ── -->
+    <main class="chat-app-container">
+        <div class="chat-layout">
+            <!-- Sidebar: Session History -->
+            <aside class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Lịch sử hội thoại</h3>
+                    <button class="btn-new-chat" @click="createNewSession()">
+                        <i class="fas fa-plus"></i> Phiên mới
+                    </button>
+                </div>
+
+                <div class="session-list">
+                    <template x-if="sessions.length === 0">
+                        <div style="padding:40px 10px;text-align:center;color:var(--text-muted);font-size:0.85rem;">
+                            Chưa có lịch sử hội thoại
+                        </div>
+                    </template>
+
+                    <template x-for="s in sessions" :key="s.idSession">
+                        <div class="session-item" :class="{ 'active': activeSession?.idSession === s.idSession }"
+                             @click="selectSession(s)">
+                            <div class="session-item-top">
+                                <span class="session-id" x-text="'#CS' + String(s.idSession).padStart(3,'0')"></span>
+                                <span class="session-badge" :class="s.trangThai?.toLowerCase()"
+                                      x-text="s.trangThai === 'WAITING' ? 'Chờ tư vấn' : s.trangThai === 'OPEN' ? 'Đang chat' : 'Đã đóng'"></span>
+                            </div>
+                            <div class="session-preview" x-text="s.tinNhanCuoi || 'Phiên hỗ trợ'"></div>
+                        </div>
+                    </template>
+                </div>
+            </aside>
+
+            <!-- Main Chat Area -->
+            <section class="chat-main">
+                <!-- Header -->
+                <div class="chat-room-header">
+                    <div class="room-user-info">
+                        <div class="room-avatar"><i class="fas fa-headset"></i></div>
+                        <div class="room-title">
+                            <h3>Tư vấn viên TechNo</h3>
+                            <div class="room-status">
+                                <span class="status-dot" :class="activeSession?.trangThai === 'OPEN' ? 'connected' : activeSession?.trangThai === 'WAITING' ? 'waiting' : 'closed'"></span>
+                                <span x-text="activeSession?.trangThai === 'OPEN' ? ('Đang hỗ trợ: ' + (activeSession.adminTenDangNhap || 'Tư vấn viên')) : activeSession?.trangThai === 'WAITING' ? 'Đang chờ tư vấn viên tiếp nhận...' : 'Phiên chat đã kết thúc'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="room-actions">
+                        <template x-if="activeSession && activeSession.trangThai !== 'CLOSED'">
+                            <button class="btn-end-session" @click="closeCurrentSession()">
+                                <i class="fas fa-power-off"></i> Kết thúc phiên
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Messages Feed -->
+                <div class="messages-container" id="chat-messages-box">
+                    <template x-if="!activeSession">
+                        <div style="margin:auto;text-align:center;color:var(--text-muted);">
+                            <i class="fas fa-comments" style="font-size:3rem;color:#cbd5e1;margin-bottom:12px;display:block;"></i>
+                            <h4 style="color:var(--text-main);margin-bottom:6px;">Chào bạn! Bạn cần TechNo hỗ trợ gì?</h4>
+                            <p style="font-size:0.88rem;margin-bottom:18px;">Bấm nút bên dưới để bắt đầu phiên chat với tư vấn viên.</p>
+                            <button class="btn-new-chat" style="padding:10px 20px;font-size:0.95rem;" @click="createNewSession()">
+                                Bắt đầu chat ngay
+                            </button>
+                        </div>
+                    </template>
+
+                    <template x-for="(m, i) in messages" :key="m.idTinNhan || i">
+                        <div class="msg-item-row" style="width: 100%; display: flex; flex-direction: column;">
+                            <!-- System message -->
+                            <div x-show="(m.nguoiGui || '').toUpperCase() === 'SYSTEM'" 
+                                 class="system-pill" 
+                                 x-text="m.noiDung"></div>
+
+                            <!-- Customer message (bên phải) -->
+                            <div x-show="(m.nguoiGui || '').toUpperCase() === 'CUSTOMER'" 
+                                 class="chat-bubble-row customer">
+                                <div class="bubble" x-text="m.noiDung"></div>
+                                <div class="bubble-time" style="text-align: right;" x-text="formatTime(m.ngayGui || m.timestamp)"></div>
+                            </div>
+
+                            <!-- Admin message (bên trái) -->
+                            <div x-show="(m.nguoiGui || '').toUpperCase() === 'ADMIN'" 
+                                 class="chat-bubble-row admin">
+                                <div class="sender-label">
+                                    <i class="fas fa-headset" style="font-size:0.68rem;margin-right:4px;"></i>
+                                    <span x-text="m.tenNguoiGui || 'Quản trị viên'"></span>
+                                </div>
+                                <div class="bubble" x-text="m.noiDung"></div>
+                                <div class="bubble-time" style="text-align: left;" x-text="formatTime(m.ngayGui || m.timestamp)"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Footer & Input -->
+                <div class="chat-input-section" x-show="activeSession">
+                    <!-- Closed notice -->
+                    <template x-if="activeSession?.trangThai === 'CLOSED'">
+                        <div class="closed-alert">
+                            <span>Phiên chat này đã kết thúc. Bạn có thắc mắc khác?</span>
+                            <button class="btn-new-chat" @click="createNewSession()">Tạo phiên mới</button>
+                        </div>
+                    </template>
+
+                    <!-- Input form -->
+                    <template x-if="activeSession?.trangThai !== 'CLOSED'">
+                        <div>
+                            <div class="quick-suggestions">
+                                <span class="suggestion-tag" @click="sendQuick('Tôi muốn tư vấn điện thoại giá dưới 10 triệu')">📱 Điện thoại < 10 triệu</span>
+                                <span class="suggestion-tag" @click="sendQuick('Tôi muốn kiểm tra tình trạng giao hàng')">📦 Kiểm tra giao hàng</span>
+                                <span class="suggestion-tag" @click="sendQuick('Chính sách đổi trả sản phẩm lỗi')">🔄 Đổi trả hàng</span>
+                            </div>
+
+                            <form class="chat-form" @submit.prevent="sendMessage()">
+                                <input type="text" class="message-input" x-model="inputText" placeholder="Nhập tin nhắn cho tư vấn viên..." autocomplete="off">
+                                <button type="submit" class="btn-send" :disabled="!inputText.trim()" title="Gửi tin nhắn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </template>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        function customerChatPage() {
+            return {
+                userId: null,
+                customerName: 'Khách hàng',
+                sessions: [],
+                activeSession: null,
+                messages: [],
+                inputText: '',
+                stompClient: null,
+                currentSub: null,
+
+                async init() {
+                    this.userId = localStorage.getItem('idKH') ? parseInt(localStorage.getItem('idKH')) : null;
+                    this.customerName = localStorage.getItem('hoTen') || 'Khách hàng';
+
+                    this.connectWebSocket();
+
+                    if (this.userId) {
+                        await this.loadCustomerSessions();
+                    }
+
+                    // Tự động mở hoặc tạo session
+                    if (this.sessions.length > 0) {
+                        const active = this.sessions.find(s => s.trangThai !== 'CLOSED') || this.sessions[0];
+                        await this.selectSession(active);
+                    } else {
+                        await this.createNewSession();
+                    }
+                },
+
+                connectWebSocket() {
+                    try {
+                        const socket = new SockJS('http://localhost:8080/ws');
+                        this.stompClient = new StompJs.Client({
+                            webSocketFactory: () => socket,
+                            reconnectDelay: 5000,
+                            onConnect: () => {
+                                console.log('✅ [Customer Chat Page] WebSocket connected');
+                                if (this.activeSession) {
+                                    this.subscribeSession(this.activeSession.idSession);
+                                }
+                            }
+                        });
+                        this.stompClient.activate();
+                    } catch (e) {
+                        console.error('WS Error:', e);
+                    }
+                },
+
+                async loadCustomerSessions() {
+                    try {
+                        const res = await axios.get(`http://localhost:8080/api/chat/khach-hang/${this.userId}/sessions`);
+                        this.sessions = res.data?.data || res.data || [];
+                    } catch (_) {}
+                },
+
+                async createNewSession() {
+                    try {
+                        const payload = {
+                            type: 'START_SESSION',
+                            idKH: this.userId,
+                            tenKhach: this.customerName,
+                            tenNguoiGui: this.customerName,
+                            nguoiGui: 'CUSTOMER'
+                        };
+                        const res = await axios.post('http://localhost:8080/api/chat/sessions', payload);
+                        const s = res.data?.data || res.data;
+                        this.activeSession = s;
+                        this.messages = s.tinNhans || [];
+
+                        // Cập nhật danh sách session
+                        const exists = this.sessions.find(x => x.idSession === s.idSession);
+                        if (!exists) this.sessions.unshift(s);
+
+                        this.subscribeSession(s.idSession);
+                        this.scrollToBottom();
+                    } catch (e) {
+                        alert('Không thể tạo phiên chat lúc này.');
+                    }
+                },
+
+                async selectSession(s) {
+                    this.activeSession = s;
+                    try {
+                        const res = await axios.get(`http://localhost:8080/api/chat/sessions/${s.idSession}`);
+                        const detail = res.data?.data || res.data;
+                        this.activeSession = detail;
+                        this.messages = detail.tinNhans || [];
+                        this.subscribeSession(s.idSession);
+                        this.scrollToBottom();
+                    } catch (_) {}
+                },
+
+                subscribeSession(sessionId) {
+                    if (!this.stompClient?.connected) return;
+                    if (this.currentSub) this.currentSub.unsubscribe();
+
+                    this.currentSub = this.stompClient.subscribe(`/topic/chat/${sessionId}`, (msg) => {
+                        const body = JSON.parse(msg.body);
+                        if (body.trangThai && this.activeSession) {
+                            this.activeSession.trangThai = body.trangThai;
+                            if (body.adminTenDangNhap) this.activeSession.adminTenDangNhap = body.adminTenDangNhap;
+                        }
+                        this.messages.push(body);
+                        this.scrollToBottom();
+                        if (body.nguoiGui === 'ADMIN') this.playChime();
+                    });
+                },
+
+                sendMessage() {
+                    const text = this.inputText.trim();
+                    if (!text || !this.activeSession) return;
+
+                    const payload = {
+                        type: 'MESSAGE',
+                        sessionId: this.activeSession.idSession,
+                        idKH: this.userId,
+                        nguoiGui: 'CUSTOMER',
+                        tenNguoiGui: this.customerName,
+                        noiDung: text
+                    };
+
+                    if (this.stompClient?.connected) {
+                        this.stompClient.publish({
+                            destination: '/app/chat',
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        axios.post(`http://localhost:8080/api/chat/sessions/${this.activeSession.idSession}/messages`, payload);
+                    }
+
+                    this.inputText = '';
+                },
+
+                sendQuick(text) {
+                    this.inputText = text;
+                    this.sendMessage();
+                },
+
+                async closeCurrentSession() {
+                    if (!this.activeSession) return;
+                    if (!confirm('Bạn có chắc chắn muốn kết thúc phiên chat này?')) return;
+
+                    const payload = {
+                        type: 'CLOSE',
+                        sessionId: this.activeSession.idSession,
+                        tenNguoiGui: this.customerName
+                    };
+
+                    if (this.stompClient?.connected) {
+                        this.stompClient.publish({
+                            destination: '/app/chat',
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        await axios.put(`http://localhost:8080/api/chat/sessions/${this.activeSession.idSession}/close`, payload);
+                    }
+                    this.activeSession.trangThai = 'CLOSED';
+                },
+
+                scrollToBottom() {
+                    setTimeout(() => {
+                        const el = document.getElementById('chat-messages-box');
+                        if (el) el.scrollTop = el.scrollHeight;
+                    }, 60);
+                },
+
+                formatTime(d) {
+                    if (!d) return '';
+                    const dt = new Date(d);
+                    return `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+                },
+
+                playChime() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+                        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.3);
+                    } catch (_) {}
+                }
+            };
+        }
+    </script>
+</body>
+</html>
+

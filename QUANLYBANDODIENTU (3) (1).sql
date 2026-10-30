@@ -609,7 +609,7 @@ VALUES
   (N'Apple MacBook Pro 14″ M2 Pro',   N'Hiệu năng cao với M2 Pro',         52990000, 15, 2, 5, 1, N'12 tháng', '1.57', '31.26 x 22.12 x 1.55', 1, 5),
   (N'Dell XPS 13 (9340)',             N'Siêu mỏng – viền siêu mỏng',       38990000, 25, 2, 5, 8, N'12 tháng', '1.23', '29.57 x 19.9 x 1.48', 1, 4),
   (N'HP Spectre x360 14″',            N'2-in-1 xoay gập 360°',              41990000, 10, 2, 5, 9, N'12 tháng', '1.36', '31.5 x 21.8 x 1.69', 1, 4),
-  (Lenovo ThinkPad X1 Carbon Gen 11',N'Business ultrabook bền bỉ',        43990000, 18, 2, 5, 19, N'12 tháng', '1.12', '31.2 x 22.2 x 1.5', 1, 4),
+  (N'Lenovo ThinkPad X1 Carbon Gen 11',N'Business ultrabook bền bỉ',        43990000, 18, 2, 5, 19, N'12 tháng', '1.12', '31.2 x 22.2 x 1.5', 1, 4),
   (N'ASUS ZenBook 14 OLED',           N'Màn hình OLED – siêu mỏng nhẹ',    24990000, 22, 2, 5, 24, N'12 tháng', '1.39', '31.9 x 21.2 x 1.49', 1, 4),
   (N'Apple Watch Series 9',      N'Smartwatch Apple',         11990000, 20, 2, 6, 1, N'12 tháng', '0.03', '4.1 x 3.1 x 1.1', 1, 1),
   (N'Samsung Galaxy Watch 6',    N'Smartwatch Samsung',       7990000, 20, 2, 6, 2, N'12 tháng', '0.04', '4.2 x 3.2 x 1.2', 1, 1),
@@ -1257,4 +1257,53 @@ BEGIN
       AND p.TrangThai = 1
     ORDER BY y.NgayThem DESC;
 END;
+GO
+
+-- ============================================================
+--  CHAT HỖ TRỢ KHÁCH HÀNG (WebSocket)
+--  TrangThai session: WAITING | OPEN | CLOSED
+--  NguoiGui tin nhắn: CUSTOMER | ADMIN | SYSTEM
+-- ============================================================
+IF OBJECT_ID(N'dbo.CHAT_TIN_NHAN', N'U') IS NOT NULL
+    DROP TABLE dbo.CHAT_TIN_NHAN;
+GO
+IF OBJECT_ID(N'dbo.CHAT_SESSION', N'U') IS NOT NULL
+    DROP TABLE dbo.CHAT_SESSION;
+GO
+
+CREATE TABLE dbo.CHAT_SESSION (
+    IdSession          INT IDENTITY(1,1) PRIMARY KEY,
+    IdKH               INT            NULL,
+    TenKhach           NVARCHAR(150)  NULL,
+    AdminTenDangNhap   NVARCHAR(100)  NULL,
+    TrangThai          NVARCHAR(20)   NOT NULL DEFAULT N'WAITING',
+    NgayTao            DATETIME       NOT NULL DEFAULT GETDATE(),
+    NgayCapNhat        DATETIME       NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_CHAT_SESSION_KH FOREIGN KEY (IdKH)
+        REFERENCES dbo.KHACH_HANG(IdKH)
+        ON DELETE SET NULL,
+    CONSTRAINT CHK_CHAT_SESSION_TrangThai
+        CHECK (TrangThai IN (N'WAITING', N'OPEN', N'CLOSED'))
+);
+GO
+
+CREATE TABLE dbo.CHAT_TIN_NHAN (
+    IdTinNhan    INT IDENTITY(1,1) PRIMARY KEY,
+    IdSession    INT            NOT NULL,
+    NguoiGui     NVARCHAR(20)   NOT NULL,
+    TenNguoiGui  NVARCHAR(150)  NULL,
+    NoiDung      NVARCHAR(2000) NOT NULL,
+    NgayGui      DATETIME       NOT NULL DEFAULT GETDATE(),
+    DaDoc        BIT            NOT NULL DEFAULT 0,
+    CONSTRAINT FK_CHAT_TN_SESSION FOREIGN KEY (IdSession)
+        REFERENCES dbo.CHAT_SESSION(IdSession)
+        ON DELETE CASCADE,
+    CONSTRAINT CHK_CHAT_TN_NguoiGui
+        CHECK (NguoiGui IN (N'CUSTOMER', N'ADMIN', N'SYSTEM'))
+);
+GO
+
+CREATE INDEX IX_CHAT_SESSION_TrangThai ON dbo.CHAT_SESSION (TrangThai, NgayCapNhat DESC);
+CREATE INDEX IX_CHAT_SESSION_IdKH      ON dbo.CHAT_SESSION (IdKH);
+CREATE INDEX IX_CHAT_TN_IdSession      ON dbo.CHAT_TIN_NHAN (IdSession, NgayGui);
 GO

@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hỗ trợ khách hàng - TechNo Admin</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome & Material Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="icon" href="/IMAGES/lg.png">
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- SockJS + STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+    <!-- Admin auth check -->
+    <script src="js/admin-auth.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #ecfdf5;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --info: #0284c7;
+            --info-light: #f0f9ff;
+            --bg-main: #f8fafc;
+            --surface: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ── Site Header ── */
+        .site-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 28px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .logo-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span { color: var(--primary); }
+
+        .logo-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 14px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .user-pill .avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+
+        .btn-logout:hover { color: var(--danger); }
+
+        /* ── Admin Layout ── */
+        .admin-layout {
+            display: flex;
+            flex: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            background: #ffffff;
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+            flex-shrink: 0;
+            min-height: calc(100vh - 67px);
+        }
+
+        .sidebar-section-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 700;
+            padding: 0 12px 10px;
+            margin-top: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu a:hover {
+            background: #f1f5f9;
+            color: var(--text-primary);
+        }
+
+        .sidebar-menu li.active a {
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* ── Main Workspace ── */
+        .main-content {
+            flex: 1;
+            padding: 24px 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .page-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .page-title p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .ws-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+        }
+
+        .ws-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .ws-dot.connected { background: var(--success); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); }
+        .ws-dot.connecting { background: var(--warning); }
+        .ws-dot.disconnected { background: var(--danger); }
+
+        /* ── Stat Strip ── */
+        .chat-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .chat-stat-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-stat-info .title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .chat-stat-info .num {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-top: 2px;
+        }
+
+        .chat-stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .chat-stat-icon.waiting { background: var(--warning-light); color: var(--warning); }
+        .chat-stat-icon.open { background: var(--success-light); color: var(--success); }
+        .chat-stat-icon.closed { background: #f1f5f9; color: var(--text-muted); }
+        .chat-stat-icon.total { background: var(--primary-light); color: var(--primary); }
+
+        /* ── 2-Column Helpdesk UI ── */
+        .helpdesk-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            flex: 1;
+            height: calc(100vh - 220px);
+            min-height: 580px;
+            max-height: calc(100vh - 220px);
+        }
+
+        /* ── Column 1: Session Queue ── */
+        .queue-pane {
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .queue-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 34px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+            background: #f8fafc;
+        }
+
+        .search-box input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .status-filters {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .filter-tab {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #f1f5f9;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .filter-tab.active {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .session-queue-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .queue-item {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .queue-item:hover {
+            background: #f8fafc;
+        }
+
+        .queue-item.active {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .queue-item-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .customer-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .avatar-initial {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .customer-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .queue-time {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .queue-item-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 4px;
+        }
+
+        .last-msg-preview {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 220px;
+        }
+
+        .badge-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .badge-pill.waiting { background: #fef3c7; color: #b45309; }
+        .badge-pill.open { background: #dcfce7; color: #15803d; }
+        .badge-pill.closed { background: #f1f5f9; color: #64748b; }
+
+        .unread-indicator {
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* ── Column 2: Chat Workspace ── */
+        .chat-pane {
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-pane-header {
+            padding: 16px 24px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .active-user-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-big-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .user-titles h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .session-ref {
+            font-family: monospace;
+            background: #f1f5f9;
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .user-titles p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .pane-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-join {
+            background: var(--success);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-join:hover { background: #059669; }
+
+        .btn-close-session {
+            background: #ffffff;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-close-session:hover {
+            background: var(--danger);
+            color: #ffffff;
+        }
+
+        /* Messages Feed (Trượt lên xuống mượt mà) */
+        .chat-pane-messages {
+            flex: 1;
+            padding: 24px 28px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: #f8fafc;
+            scroll-behavior: smooth;
+        }
+
+        /* Thanh cuộn lên xuống hiện đại */
+        .chat-pane-messages::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .chat-pane-messages::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .chat-pane-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .chat-pane-messages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Nút nổi trượt xuống tin nhắn mới nhất */
+        .btn-scroll-down {
+            position: absolute;
+            bottom: 78px;
+            right: 28px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--primary);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            z-index: 20;
+        }
+
+        .btn-scroll-down:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3);
+        }
+
+        .pane-bubble-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 72%;
+        }
+
+        /* Customer (bên trái) */
+        .pane-bubble-row.customer {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .pane-bubble-row.customer .bubble {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px 18px 18px 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            padding: 13px 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .pane-bubble-row.customer .sender-meta {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 5px;
+            margin-left: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Admin (bên phải) */
+        .pane-bubble-row.admin {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .pane-bubble-row.admin .sender-meta {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 5px;
+            margin-right: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .pane-bubble-row.admin .bubble {
+            background: #1d68f2;
+            color: #ffffff;
+            border-radius: 18px 18px 4px 18px;
+            padding: 13px 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(29, 104, 242, 0.22);
+            word-break: break-word;
+        }
+
+        .bubble-time {
+            font-size: 0.74rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        .pane-bubble-row.admin .bubble-time { text-align: right; }
+
+        .system-pill {
+            align-self: center;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 9px 24px;
+            border-radius: 24px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            text-align: center;
+            margin: 4px auto 12px;
+            max-width: 480px;
+            line-height: 1.4;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        /* Input Controls */
+        .chat-pane-footer {
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 14px 20px;
+        }
+
+        .quick-templates {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            scrollbar-width: none;
+        }
+
+        .template-pill {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.76rem;
+            padding: 5px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .template-pill:hover {
+            background: #e2e8f0;
+            color: var(--text-primary);
+        }
+
+        .admin-chat-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-input {
+            flex: 1;
+            padding: 11px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .admin-input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn-admin-send {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-admin-send:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-admin-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 900px) {
+            .helpdesk-card {
+                grid-template-columns: 1fr;
+            }
+            .queue-pane {
+                max-height: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body x-data="adminChatDesk()" x-init="init()">
+
+    <!-- ── Header ── -->
+    <header class="site-header">
+        <div class="top-header">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Tech<span>No</span></div>
+                <span class="logo-badge">Quản trị viên</span>
+            </a>
+
+            <div class="header-actions">
+                <div class="user-pill">
+                    <div class="avatar"><i class="fas fa-headset"></i></div>
+                    <span x-text="adminUsername || 'Tư vấn viên'"></span>
+                </div>
+                <button class="btn-logout" onclick="adminLogout()" title="Đăng xuất">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Thoát</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── Admin Layout ── -->
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-section-title">Quản lý cửa hàng</div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="admins.html">
+                        <span class="material-icons">add_box</span>
+                        <span>Thêm sản phẩm</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="adminSanPham.html">
+                        <span class="material-icons">inventory</span>
+                        <span>Sản phẩm</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="UserAd.html">
+                        <span class="material-icons">people</span>
+                        <span>Người dùng</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="AdDH.html">
+                        <span class="material-icons">receipt_long</span>
+                        <span>Đơn hàng</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="AdChat.html">
+                        <span class="material-icons">forum</span>
+                        <span>Hỗ trợ chat</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-title" style="margin-top:24px;">Liên kết nhanh</div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="index.html" target="_blank">
+                        <span class="material-icons">storefront</span>
+                        <span>Xem cửa hàng</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="order-tracking.html" target="_blank">
+                        <span class="material-icons">local_shipping</span>
+                        <span>Theo dõi đơn KH</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Top Bar -->
+            <div class="page-top-bar">
+                <div class="page-title">
+                    <h1>Trung tâm hỗ trợ khách hàng</h1>
+                    <p>Trao đổi trực tiếp qua WebSocket và quản lý lịch sử hội thoại hỗ trợ.</p>
+                </div>
+
+                <div class="ws-chip">
+                    <span class="ws-dot" :class="wsStatus"></span>
+                    <span x-text="wsStatus === 'connected' ? 'Realtime: Đã kết nối' :
+                                  wsStatus === 'connecting' ? 'Realtime: Đang nối...' :
+                                  'Realtime: Mất kết nối'"></span>
+                </div>
+            </div>
+
+            <!-- Stats Strip -->
+            <div class="chat-stats-strip">
+                <div class="chat-stat-box">
+                    <div class="chat-stat-info">
+                        <div class="title">Chờ hỗ trợ</div>
+                        <div class="num" style="color:var(--warning);" x-text="stats.waiting">0</div>
+                    </div>
+                    <div class="chat-stat-icon waiting"><i class="fas fa-hourglass-half"></i></div>
+                </div>
+
+                <div class="chat-stat-box">
+                    <div class="chat-stat-info">
+                        <div class="title">Đang chat</div>
+                        <div class="num" style="color:var(--success);" x-text="stats.open">0</div>
+                    </div>
+                    <div class="chat-stat-icon open"><i class="fas fa-comments"></i></div>
+                </div>
+
+                <div class="chat-stat-box">
+                    <div class="chat-stat-info">
+                        <div class="title">Đã giải quyết</div>
+                        <div class="num" style="color:var(--text-secondary);" x-text="stats.closed">0</div>
+                    </div>
+                    <div class="chat-stat-icon closed"><i class="fas fa-circle-check"></i></div>
+                </div>
+
+                <div class="chat-stat-box">
+                    <div class="chat-stat-info">
+                        <div class="title">Tổng phiên chat</div>
+                        <div class="num" style="color:var(--primary);" x-text="allSessions.length">0</div>
+                    </div>
+                    <div class="chat-stat-icon total"><i class="fas fa-inbox"></i></div>
+                </div>
+            </div>
+
+            <!-- 2-Column Helpdesk Workspace -->
+            <div class="helpdesk-card">
+                <!-- Column 1: Session Queue & Filters -->
+                <div class="queue-pane">
+                    <div class="queue-header">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="search" x-model="searchQuery" @input="applyFilter()" placeholder="Tìm khách, mã phiên #CS...">
+                        </div>
+
+                        <div class="status-filters">
+                            <button class="filter-tab" :class="{ 'active': activeTab === '' }" @click="setTab('')">Tất cả</button>
+                            <button class="filter-tab" :class="{ 'active': activeTab === 'WAITING' }" @click="setTab('WAITING')">Chờ tư vấn</button>
+                            <button class="filter-tab" :class="{ 'active': activeTab === 'OPEN' }" @click="setTab('OPEN')">Đang mở</button>
+                            <button class="filter-tab" :class="{ 'active': activeTab === 'CLOSED' }" @click="setTab('CLOSED')">Đã đóng</button>
+                        </div>
+                    </div>
+
+                    <div class="session-queue-list">
+                        <template x-if="filteredSessions.length === 0">
+                            <div style="padding:40px 10px;text-align:center;color:var(--text-muted);font-size:0.85rem;">
+                                Không tìm thấy phiên chat phù hợp
+                            </div>
+                        </template>
+
+                        <template x-for="s in filteredSessions" :key="s.idSession">
+                            <div class="queue-item" :class="{ 'active': currentSession?.idSession === s.idSession }"
+                                 @click="selectSession(s)">
+                                <div class="queue-item-top">
+                                    <div class="customer-meta">
+                                        <div class="avatar-initial" x-text="getInitial(s.tenKhach)"></div>
+                                        <div class="customer-name" x-text="s.tenKhach || 'Khách vãng lai'"></div>
+                                    </div>
+                                    <span class="queue-time" x-text="formatTime(s.ngayCapNhat)"></span>
+                                </div>
+
+                                <div class="queue-item-bottom">
+                                    <div class="last-msg-preview" x-text="s.tinNhanCuoi || 'Yêu cầu tư vấn mới'"></div>
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <span class="badge-pill" :class="s.trangThai?.toLowerCase()"
+                                              x-text="s.trangThai === 'WAITING' ? 'Chờ' : s.trangThai === 'OPEN' ? 'Đang chat' : 'Đã đóng'"></span>
+                                        <span class="unread-indicator" x-show="s.soTinChuaDoc > 0" x-text="s.soTinChuaDoc"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Column 2: Chat Detail Pane -->
+                <div class="chat-pane">
+                    <!-- Pane Header -->
+                    <div class="chat-pane-header">
+                        <template x-if="currentSession">
+                            <div class="active-user-details">
+                                <div class="user-big-avatar" x-text="getInitial(currentSession.tenKhach)"></div>
+                                <div class="user-titles">
+                                    <h3>
+                                        <span x-text="currentSession.tenKhach || 'Khách vãng lai'"></span>
+                                        <span class="session-ref" x-text="'#CS' + String(currentSession.idSession).padStart(3,'0')"></span>
+                                    </h3>
+                                    <p>
+                                        <span x-text="'Tạo lúc: ' + formatFullDate(currentSession.ngayTao)"></span>
+                                        <span x-show="currentSession.adminTenDangNhap" x-text="' • Phụ trách: ' + currentSession.adminTenDangNhap"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="!currentSession">
+                            <div style="color:var(--text-muted);font-size:0.9rem;">
+                                Chọn một phiên chat bên trái để bắt đầu hỗ trợ
+                            </div>
+                        </template>
+
+                        <!-- Action buttons -->
+                        <div class="pane-actions" x-show="currentSession">
+                            <template x-if="currentSession?.trangThai === 'WAITING'">
+                                <button class="btn-join" @click="joinSession(currentSession.idSession)">
+                                    <i class="fas fa-handshake"></i>
+                                    <span>Tiếp nhận hỗ trợ</span>
+                                </button>
+                            </template>
+
+                            <template x-if="currentSession?.trangThai !== 'CLOSED'">
+                                <button class="btn-close-session" @click="closeSession(currentSession.idSession)">
+                                    <i class="fas fa-check-double"></i>
+                                    <span>Đóng phiên</span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Messages Feed -->
+                    <div class="chat-pane-messages" id="admin-messages-box">
+                        <template x-if="!currentSession">
+                            <div style="margin:auto;text-align:center;color:var(--text-muted);">
+                                <i class="fas fa-headset" style="font-size:3.5rem;color:#cbd5e1;margin-bottom:14px;display:block;"></i>
+                                <h3 style="color:var(--text-primary);margin-bottom:6px;">Bàn hỗ trợ tư vấn viên</h3>
+                                <p style="font-size:0.88rem;">Chọn một phiên chat từ danh sách hàng đợi bên trái để bắt đầu trao đổi với khách hàng.</p>
+                            </div>
+                        </template>
+
+                        <template x-for="(m, i) in messages" :key="m.idTinNhan || m._tempId || i">
+                            <div class="msg-item-row" style="width: 100%; display: flex; flex-direction: column;">
+                                <!-- 1. Thông báo hệ thống (SYSTEM - căn giữa) -->
+                                <div x-show="(m.nguoiGui || '').toUpperCase() === 'SYSTEM'"
+                                     class="system-pill"
+                                     x-text="m.noiDung"></div>
+
+                                <!-- 2. Tin nhắn khách hàng gửi (CUSTOMER - bên trái) -->
+                                <div x-show="(m.nguoiGui || '').toUpperCase() === 'CUSTOMER'"
+                                     class="pane-bubble-row customer">
+                                    <div class="sender-meta">
+                                        <i class="fas fa-user" style="font-size: 0.72rem;"></i>
+                                        <span x-text="m.tenNguoiGui || currentSession?.tenKhach || 'Khách hàng'"></span>
+                                    </div>
+                                    <div class="bubble" x-text="m.noiDung"></div>
+                                    <div class="bubble-time" style="text-align: left;" x-text="formatTime(m.ngayGui || m.timestamp)"></div>
+                                </div>
+
+                                <!-- 3. Tin nhắn tư vấn viên / admin gửi (ADMIN - bên phải) -->
+                                <div x-show="(m.nguoiGui || '').toUpperCase() === 'ADMIN'"
+                                     class="pane-bubble-row admin">
+                                    <div class="bubble" x-text="m.noiDung"></div>
+                                    <div class="bubble-time" style="text-align: right;" x-text="formatTime(m.ngayGui || m.timestamp)"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer: Quick templates + Input -->
+                    <div class="chat-pane-footer" x-show="currentSession">
+                        <template x-if="currentSession?.trangThai !== 'CLOSED'">
+                            <div>
+                                <div class="quick-templates">
+                                    <span class="template-pill" @click="useTemplate('Dạ em chào anh/chị, em có thể hỗ trợ gì cho mình ạ?')">👋 Chào khách</span>
+                                    <span class="template-pill" @click="useTemplate('Anh/chị vui lòng cho em xin mã đơn hàng hoặc SĐT để em kiểm tra ngay ạ.')">📦 Xin mã đơn/SĐT</span>
+                                    <span class="template-pill" @click="useTemplate('Đơn hàng của anh/chị đang được đóng gói và chuẩn bị bàn giao cho bên vận chuyển ạ.')">🚚 Đang giao hàng</span>
+                                    <span class="template-pill" @click="useTemplate('Dạ cảm ơn anh/chị đã liên hệ TechNo. Chúc anh/chị một ngày tốt lành!')">✨ Kết thúc tư vấn</span>
+                                </div>
+
+                                <form class="admin-chat-form" @submit.prevent="sendAdminMessage()">
+                                    <input type="text" class="admin-input" x-model="inputText" placeholder="Nhập câu trả lời cho khách hàng (Enter để gửi)..." autocomplete="off">
+                                    <button type="submit" class="btn-admin-send" :disabled="!inputText.trim()" title="Gửi tin nhắn">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </template>
+
+                        <template x-if="currentSession?.trangThai === 'CLOSED'">
+                            <div style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:6px 0;">
+                                <i class="fas fa-lock" style="margin-right:6px;"></i>
+                                Phiên chat này đã được đóng. Bạn có thể xem lại toàn bộ lịch sử trao đổi.
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function adminChatDesk() {
+            return {
+                allSessions: [],
+                filteredSessions: [],
+                currentSession: null,
+                messages: [],
+                inputText: '',
+                searchQuery: '',
+                activeTab: '', // '' | WAITING | OPEN | CLOSED
+                stats: { waiting: 0, open: 0, closed: 0 },
+                adminUsername: 'Admin',
+
+                stompClient: null,
+                wsStatus: 'disconnected',
+                sessionSub: null,
+
+                async init() {
+                    // Lấy tên admin từ localStorage (key được set lúc đăng nhập)
+                    const u = localStorage.getItem('hoTen')
+                           || localStorage.getItem('email')
+                           || localStorage.getItem('username')
+                           || localStorage.getItem('adminUser')
+                           || 'Admin';
+                    this.adminUsername = u;
+
+                    await this.loadSessions();
+                    this.connectWebSocket();
+                },
+
+                async loadSessions() {
+                    try {
+                        const res = await axios.get('http://localhost:8080/api/chat/sessions');
+                        // API trả về ResponseDto<List> hoặc trực tiếp List
+                        const raw = res.data;
+                        this.allSessions = Array.isArray(raw) ? raw
+                                         : Array.isArray(raw?.data) ? raw.data
+                                         : [];
+                        this.calcStats();
+                        this.applyFilter();
+
+                        // Nếu có session đang mở trước đó, chọn lại
+                        if (this.currentSession) {
+                            const found = this.allSessions.find(s => s.idSession === this.currentSession.idSession);
+                            if (found) this.currentSession = found;
+                        }
+                        // KHÔNG tự động selectSession ở đây — tránh render rỗng
+                        // Admin sẽ click để chọn session
+                    } catch (e) {
+                        console.error('Lỗi tải danh sách session:', e);
+                    }
+                },
+
+                applyFilter() {
+                    let result = [...this.allSessions];
+                    if (this.activeTab) {
+                        result = result.filter(s => s.trangThai === this.activeTab);
+                    }
+                    const q = this.searchQuery.trim().toLowerCase();
+                    if (q) {
+                        result = result.filter(s =>
+                            (s.tenKhach || '').toLowerCase().includes(q) ||
+                            String(s.idSession).includes(q) ||
+                            ('cs' + String(s.idSession)).includes(q)
+                        );
+                    }
+                    this.filteredSessions = result;
+                },
+
+                setTab(tab) {
+                    this.activeTab = tab;
+                    this.applyFilter();
+                },
+
+                calcStats() {
+                    const s = this.allSessions;
+                    this.stats = {
+                        waiting: s.filter(x => x.trangThai === 'WAITING').length,
+                        open:    s.filter(x => x.trangThai === 'OPEN').length,
+                        closed:  s.filter(x => x.trangThai === 'CLOSED').length
+                    };
+                },
+
+                async selectSession(s) {
+                    this.currentSession = s;
+                    this.messages = [];
+                    try {
+                        const res = await axios.get(`http://localhost:8080/api/chat/sessions/${s.idSession}`);
+                        // API ChatController trả về ResponseDto<ChatSessionDTO>
+                        const raw = res.data;
+                        // Hỗ trợ cả 2 format: { success, data: {...} } hoặc trực tiếp {...}
+                        const detail = raw?.data ?? raw;
+
+                        if (!detail || !detail.idSession) {
+                            console.error('selectSession: response không hợp lệ', raw);
+                            return;
+                        }
+
+                        this.currentSession = detail;
+                        // tinNhans có thể là null/undefined nếu API không trả về
+                        this.messages = Array.isArray(detail.tinNhans) ? detail.tinNhans : [];
+
+                        // Đánh dấu đã đọc (silent)
+                        s.soTinChuaDoc = 0;
+                        axios.put(`http://localhost:8080/api/chat/sessions/${s.idSession}/read`).catch(() => {});
+
+                        // Subscribe topic session
+                        this.subscribeSessionTopic(s.idSession);
+                        this.scrollToBottom();
+
+                        console.log(`✅ selectSession #${s.idSession}: ${this.messages.length} tin nhắn`);
+                    } catch (e) {
+                        console.error('Lỗi tải chi tiết phiên:', e?.response?.data || e.message);
+                    }
+                },
+
+                connectWebSocket() {
+                    this.wsStatus = 'connecting';
+                    try {
+                        const socket = new SockJS('http://localhost:8080/ws');
+                        this.stompClient = new StompJs.Client({
+                            webSocketFactory: () => socket,
+                            reconnectDelay: 5000,
+                            onConnect: () => {
+                                this.wsStatus = 'connected';
+                                console.log('✅ [Admin Chat Desk] WebSocket connected');
+
+                                // Subscribe kênh admin (nhận tất cả sự kiện chat)
+                                this.stompClient.subscribe('/topic/chat/admin', (msg) => {
+                                    try {
+                                        this.handleAdminBroadcast(JSON.parse(msg.body));
+                                    } catch(e) {
+                                        console.error('Lỗi parse admin broadcast:', e);
+                                    }
+                                });
+
+                                // Re-subscribe session đang mở (nếu có)
+                                if (this.currentSession?.idSession) {
+                                    this.subscribeSessionTopic(this.currentSession.idSession);
+                                }
+                            },
+                            onDisconnect: () => {
+                                this.wsStatus = 'disconnected';
+                                this.sessionSub = null;
+                            },
+                            onStompError: () => {
+                                this.wsStatus = 'disconnected';
+                                this.sessionSub = null;
+                            }
+                        });
+                        this.stompClient.activate();
+                    } catch (e) {
+                        this.wsStatus = 'disconnected';
+                        console.error('WebSocket init error:', e);
+                    }
+                },
+
+                subscribeSessionTopic(sessionId) {
+                    if (!this.stompClient?.connected) {
+                        console.warn('subscribeSessionTopic: WS chưa kết nối, sẽ thử lại khi connect');
+                        return;
+                    }
+                    // Hủy sub cũ nếu có
+                    if (this.sessionSub) {
+                        try { this.sessionSub.unsubscribe(); } catch(_) {}
+                        this.sessionSub = null;
+                    }
+
+                    this.sessionSub = this.stompClient.subscribe(`/topic/chat/${sessionId}`, (msg) => {
+                        try {
+                            const body = JSON.parse(msg.body);
+                            this.handleRoomMessage(body);
+                        } catch(e) {
+                            console.error('Lỗi parse WS message:', e);
+                        }
+                    });
+                    console.log(`✅ Subscribed /topic/chat/${sessionId}`);
+                },
+
+                handleAdminBroadcast(payload) {
+                    console.log('📡 [Admin Broadcast]:', payload.type, payload);
+
+                    // Cập nhật hoặc thêm session trong danh sách
+                    let s = this.allSessions.find(x => x.idSession === payload.sessionId);
+                    if (!s) {
+                        // Session mới chưa có trong list → thêm vào
+                        s = {
+                            idSession:         payload.sessionId,
+                            idKH:              payload.idKH,
+                            tenKhach:          payload.tenKhach || 'Khách hàng',
+                            adminTenDangNhap:  payload.adminTenDangNhap,
+                            trangThai:         payload.trangThai || 'WAITING',
+                            ngayCapNhat:       new Date().toISOString(),
+                            tinNhanCuoi:       payload.noiDung,
+                            soTinChuaDoc:      payload.nguoiGui === 'CUSTOMER' ? 1 : 0
+                        };
+                        this.allSessions.unshift(s);
+                        if (payload.type === 'SESSION_CREATED') this.playAlertSound();
+                    } else {
+                        // Cập nhật thông tin session đã có
+                        if (payload.noiDung)          s.tinNhanCuoi     = payload.noiDung;
+                        s.ngayCapNhat = new Date().toISOString();
+                        if (payload.trangThai)        s.trangThai        = payload.trangThai;
+                        if (payload.adminTenDangNhap) s.adminTenDangNhap = payload.adminTenDangNhap;
+
+                        // Tăng badge unread nếu khách gửi và admin đang xem session khác
+                        const isViewingThis = this.currentSession?.idSession === s.idSession;
+                        if (!isViewingThis && payload.nguoiGui === 'CUSTOMER') {
+                            s.soTinChuaDoc = (s.soTinChuaDoc || 0) + 1;
+                            this.playAlertSound();
+                        }
+
+                        // Đưa session lên đầu danh sách
+                        this.allSessions = [s, ...this.allSessions.filter(x => x.idSession !== s.idSession)];
+                    }
+
+                    this.calcStats();
+                    this.applyFilter();
+                },
+
+                handleRoomMessage(msg) {
+                    // Chỉ xử lý nếu đang xem đúng session
+                    if (!this.currentSession || this.currentSession.idSession !== msg.sessionId) return;
+
+                    // Cập nhật trạng thái session nếu có
+                    if (msg.trangThai) {
+                        this.currentSession.trangThai = msg.trangThai;
+                        if (msg.adminTenDangNhap) this.currentSession.adminTenDangNhap = msg.adminTenDangNhap;
+                    }
+
+                    if (msg.nguoiGui === 'ADMIN' && msg.idTinNhan) {
+                        // Tìm tin optimistic (chưa có idTinNhan) cùng nội dung để thay thế
+                        const optimisticIdx = this.messages.findIndex(
+                            m => m.idTinNhan === null && m.nguoiGui === 'ADMIN' && m.noiDung === msg.noiDung
+                        );
+                        if (optimisticIdx !== -1) {
+                            // Thay thế tin optimistic bằng tin thật từ server
+                            this.messages.splice(optimisticIdx, 1, msg);
+                            return;
+                        }
+                    }
+
+                    // Tránh duplicate tin đã có idTinNhan
+                    if (msg.idTinNhan) {
+                        const exists = this.messages.some(m => m.idTinNhan === msg.idTinNhan);
+                        if (exists) return;
+                    }
+
+                    this.messages.push(msg);
+                    this.scrollToBottom();
+
+                    // Đánh dấu đã đọc nếu là tin khách
+                    if (msg.nguoiGui === 'CUSTOMER') {
+                        axios.put(`http://localhost:8080/api/chat/sessions/${msg.sessionId}/read`).catch(() => {});
+                    }
+                },
+
+                async joinSession(sessionId) {
+                    try {
+                        const payload = {
+                            type: 'JOIN',
+                            sessionId: sessionId,
+                            adminTenDangNhap: this.adminUsername
+                        };
+
+                        if (this.stompClient?.connected) {
+                            this.stompClient.publish({
+                                destination: '/app/chat',
+                                body: JSON.stringify(payload)
+                            });
+                        } else {
+                            await axios.post(`http://localhost:8080/api/chat/sessions/${sessionId}/join`, payload);
+                        }
+
+                        if (this.currentSession) {
+                            this.currentSession.trangThai = 'OPEN';
+                            this.currentSession.adminTenDangNhap = this.adminUsername;
+                        }
+                        this.calcStats();
+                    } catch (e) {
+                        alert('Không thể tiếp nhận phiên lúc này.');
+                    }
+                },
+
+                async closeSession(sessionId) {
+                    if (!confirm(`Bạn có chắc chắn muốn đóng phiên hỗ trợ #CS${String(sessionId).padStart(3,'0')}?`)) return;
+
+                    try {
+                        const payload = {
+                            type: 'CLOSE',
+                            sessionId: sessionId,
+                            adminTenDangNhap: this.adminUsername,
+                            tenNguoiGui: this.adminUsername
+                        };
+
+                        if (this.stompClient?.connected) {
+                            this.stompClient.publish({
+                                destination: '/app/chat',
+                                body: JSON.stringify(payload)
+                            });
+                        } else {
+                            await axios.put(`http://localhost:8080/api/chat/sessions/${sessionId}/close`, payload);
+                        }
+
+                        if (this.currentSession) {
+                            this.currentSession.trangThai = 'CLOSED';
+                        }
+                        this.calcStats();
+                    } catch (e) {
+                        alert('Không thể đóng phiên lúc này.');
+                    }
+                },
+
+                sendAdminMessage() {
+                    const text = this.inputText.trim();
+                    if (!text || !this.currentSession) return;
+                    if (this.currentSession.trangThai === 'CLOSED') return;
+
+                    const payload = {
+                        type:             'MESSAGE',
+                        sessionId:        this.currentSession.idSession,
+                        nguoiGui:         'ADMIN',
+                        tenNguoiGui:      this.adminUsername,
+                        adminTenDangNhap: this.adminUsername,
+                        noiDung:          text
+                    };
+
+                    this.inputText = '';   // reset sớm để UX mượt hơn
+
+                    if (this.stompClient?.connected) {
+                        // Hiện tin ngay lập tức (optimistic) — WS echo sẽ tới sau
+                        // Dùng _tempId âm để phân biệt với tin thật (idTinNhan > 0)
+                        const tempMsg = {
+                            _tempId:     -(Date.now()),
+                            idTinNhan:   null,
+                            nguoiGui:    'ADMIN',
+                            tenNguoiGui: this.adminUsername,
+                            noiDung:     text,
+                            ngayGui:     new Date().toISOString(),
+                            daDoc:       true
+                        };
+                        this.messages.push(tempMsg);
+                        this.scrollToBottom();
+
+                        this.stompClient.publish({
+                            destination: '/app/chat',
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        // Fallback REST
+                        axios.post(`http://localhost:8080/api/chat/sessions/${this.currentSession.idSession}/messages`, payload)
+                            .then(res => {
+                                const msg = res.data?.data ?? res.data;
+                                if (msg) {
+                                    this.messages.push(msg);
+                                    this.scrollToBottom();
+                                }
+                            })
+                            .catch(e => console.error('Lỗi gửi tin REST:', e));
+                    }
+                },
+
+                useTemplate(text) {
+                    this.inputText = text;
+                    this.sendAdminMessage();
+                },
+
+                scrollToBottom() {
+                    setTimeout(() => {
+                        const el = document.getElementById('admin-messages-box');
+                        if (el) el.scrollTop = el.scrollHeight;
+                    }, 60);
+                },
+
+                getInitial(name) {
+                    if (!name) return 'K';
+                    const parts = name.trim().split(/\s+/);
+                    return parts[parts.length - 1].charAt(0).toUpperCase();
+                },
+
+                formatTime(d) {
+                    if (!d) return '';
+                    const dt = new Date(d);
+                    if (isNaN(dt.getTime())) return '';
+                    return `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+                },
+
+                formatFullDate(d) {
+                    if (!d) return '—';
+                    const dt = new Date(d);
+                    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+                },
+
+                playAlertSound() {
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(440, ctx.currentTime);
+                        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.35);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.35);
+                    } catch (_) {}
+                }
+            };
+        }
+    </script>
+</body>
+</html>
+

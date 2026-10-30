@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.ChatMessageDTO;
 import com.example.demo.dto.DonHangNotificationDTO;
 import com.example.demo.dto.SanPhamListDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -125,6 +126,35 @@ public class WebSocketService {
                     + notification.getDonHangId() + " → " + notification.getTenTrangThai());
         } catch (Exception e) {
             System.err.println("❌ Lỗi gửi WebSocket STATUS_UPDATED: " + e.getMessage());
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  CHAT HỖ TRỢ — /topic/chat/{sessionId}  (khách + admin cùng phòng)
+    //               /topic/chat/admin         (danh sách hội thoại)
+    // ═══════════════════════════════════════════════════════════
+
+    public void notifyChatMessage(ChatMessageDTO payload) {
+        try {
+            if (payload.getTimestamp() == 0) {
+                payload.setTimestamp(System.currentTimeMillis());
+            }
+            messagingTemplate.convertAndSend("/topic/chat/" + payload.getSessionId(), payload);
+            System.out.println("📡 WebSocket [CHAT]: session #" + payload.getSessionId()
+                    + " type=" + payload.getType());
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi WebSocket CHAT: " + e.getMessage());
+        }
+    }
+
+    public void notifyChatAdmin(ChatMessageDTO payload) {
+        try {
+            if (payload.getTimestamp() == 0) {
+                payload.setTimestamp(System.currentTimeMillis());
+            }
+            messagingTemplate.convertAndSend("/topic/chat/admin", payload);
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi WebSocket CHAT admin: " + e.getMessage());
         }
     }
 
