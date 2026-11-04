@@ -30,6 +30,7 @@ public class DonHangService {
     private final LichSuDonHangRepository     lichSuDonHangRepository;
     private final ThongBaoRepository          thongBaoRepository;
     private final WebSocketService            webSocketService;
+    private final SanPhamRepository           sanPhamRepository;
     private final Random random = new Random();
 
     @Transactional
@@ -133,6 +134,39 @@ public class DonHangService {
                     .build();
 
             webSocketService.notifyNewOrder(notification);
+
+            // ── Trừ tồn kho cho từng sản phẩm trong giỏ hàng ────────────────
+            // Ưu tiên dùng chiTietDonHang từ request (frontend localStorage-based)
+            // Fallback về DB cart nếu không có
+            System.out.println("📦 chiTietDonHang nhận được: "
+                    + (request.getChiTietDonHang() != null ? request.getChiTietDonHang().size() + " items" : "NULL"));
+
+            boolean usedRequestItems = false;
+            if (request.getChiTietDonHang() != null && !request.getChiTietDonHang().isEmpty()) {
+                for (CheckoutRequestDTO.ChiTietDonHangDTO item : request.getChiTietDonHang()) {
+                    if (item.getSanPhamId() == null || item.getSoLuong() == null) {
+                        System.out.println("⚠️ Bỏ qua item null: sanPhamId=" + item.getSanPhamId() + ", soLuong=" + item.getSoLuong());
+                        continue;
+                    }
+                    System.out.println("🔻 Trừ kho: sanPhamId=" + item.getSanPhamId() + ", soLuong=" + item.getSoLuong());
+                    int updated = sanPhamRepository.decreaseStock(item.getSanPhamId(), item.getSoLuong());
+                    System.out.println("   → updated=" + updated + (updated == 0 ? " ⚠️ KHÔNG ĐỦ KHO" : " ✅"));
+                }
+                usedRequestItems = true;
+            }
+
+            if (!usedRequestItems) {
+                System.out.println("📦 Fallback về DB cart...");
+                List<Cart> cartEntities = cartRepository.findByKhachHang_IdKH(request.getKhachHangId());
+                System.out.println("📦 DB cart có " + cartEntities.size() + " items");
+                for (Cart cartItem : cartEntities) {
+                    Integer idSp    = cartItem.getSanPham().getIdSp();
+                    Integer soLuong = cartItem.getSoLuong();
+                    System.out.println("🔻 Trừ kho (DB): sanPhamId=" + idSp + ", soLuong=" + soLuong);
+                    int updated = sanPhamRepository.decreaseStock(idSp, soLuong);
+                    System.out.println("   → updated=" + updated + (updated == 0 ? " ⚠️ KHÔNG ĐỦ KHO" : " ✅"));
+                }
+            }
 
             // Xóa giỏ hàng
             cartService.clearCart(request.getKhachHangId());
