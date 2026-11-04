@@ -372,6 +372,7 @@
                     if (localCartItems.length > 0) {
                         // Chuyển đổi định dạng từ localStorage sang định dạng cần thiết cho checkout
                         this.cartItems = localCartItems.map(item => ({
+                            idSp: item.id,              // giữ id để trừ kho
                             tenSanPham: item.name,
                             hinhAnh: item.image,
                             soLuong: item.quantity,
@@ -447,13 +448,18 @@
                     
                     // Thêm thông tin sản phẩm từ giỏ hàng vào formData
                     const orderItems = this.cartItems.map(item => {
+                        const spId = parseInt(item.idSp || item.id);
+                        const qty  = parseInt(item.soLuong || item.quantity);
+                        const gia  = parseFloat(item.giaBan || item.price || 0);
                         return {
-                            sanPhamId: item.idSp || item.id,
-                            soLuong: item.soLuong || item.quantity,
-                            donGia: item.giaBan || item.price,
-                            thanhTien: item.thanhTien || (item.giaBan || item.price) * (item.soLuong || item.quantity)
+                            sanPhamId: isNaN(spId) ? null : spId,
+                            soLuong:   isNaN(qty)  ? 1    : qty,
+                            donGia:    isNaN(gia)  ? 0    : gia,
+                            thanhTien: (isNaN(gia) ? 0 : gia) * (isNaN(qty) ? 1 : qty)
                         };
-                    });
+                    }).filter(item => item.sanPhamId !== null && item.sanPhamId > 0);
+
+                    console.log('🛒 Chi tiết đơn hàng gửi lên:', orderItems);
                     
                     // Thêm phương thức thanh toán và danh sách sản phẩm
                     const orderData = {
