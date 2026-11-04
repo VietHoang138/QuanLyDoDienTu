@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
@@ -106,25 +105,50 @@ public class ImageStorageService {
     }
 
     /**
-     * Lưu ảnh upload từ client vào thư mục Image
+     * Lưu ảnh upload từ client vào thư mục Image.
+     * Tên file được tạo theo format: SP_{prefix}_{index}.ext
+     * Ví dụ: SP_iPhone15_1.jpg, SP_Samsung_2.png
+     *
+     * @param file   file ảnh upload
+     * @param prefix tiền tố từ tên sản phẩm (bỏ ký tự đặc biệt)
+     * @param index  số thứ tự ảnh (1, 2, 3...)
      */
-    public String storeFile(MultipartFile file) throws IOException {
+    public String storeFile(MultipartFile file, String prefix, int index) throws IOException {
         Path imageDir = getImageStorageLocation();
         if (!Files.exists(imageDir)) {
             Files.createDirectories(imageDir);
         }
 
         String originalFilename = file.getOriginalFilename();
-        String extension = "";
+        String extension = ".jpg"; // mặc định
         if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
         }
 
-        String fileName = System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
-        Path targetLocation = imageDir.resolve(fileName).normalize();
-        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        // Tạo tên theo format SP_{prefix}_{index}.ext
+        String cleanPrefix = (prefix != null && !prefix.trim().isEmpty())
+            ? prefix.trim().replaceAll("[^a-zA-Z0-9_]", "")
+            : "";
+        String safePrefix = cleanPrefix.isEmpty() ? "SP" : cleanPrefix.substring(0, Math.min(cleanPrefix.length(), 20));
 
+        String fileName = "SP_" + safePrefix + "_" + index + extension;
+
+        // Nếu trùng tên, thêm timestamp để tránh conflict
+        Path targetLocation = imageDir.resolve(fileName).normalize();
+        if (Files.exists(targetLocation)) {
+            fileName = "SP_" + safePrefix + "_" + index + "_" + System.currentTimeMillis() + extension;
+            targetLocation = imageDir.resolve(fileName).normalize();
+        }
+
+        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
         return fileName;
+    }
+
+    /**
+     * Lưu ảnh với tên random (giữ tương thích với code cũ nếu cần)
+     */
+    public String storeFile(MultipartFile file) throws IOException {
+        return storeFile(file, "SP", (int)(System.currentTimeMillis() % 10000));
     }
 }
 

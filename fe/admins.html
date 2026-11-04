@@ -16,6 +16,9 @@
      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
      <!-- Kiểm tra quyền admin -->
      <script src="js/admin-auth.js"></script>
+     <style>
+       .image-preview-item { position: relative !important; overflow: hidden; }
+     </style>
 </head>
 <body class="bg-body">
 
@@ -171,14 +174,15 @@
                   <label for="productImages">Hình ảnh sản phẩm *</label>
                   <input type="file" id="productImages" multiple accept="image/*" @change="handleImageUpload($event)">
                   <div class="image-preview-container" x-show="images.length > 0">
-                      <template x-for="(image, index) in images" :key="index">
+                      <template x-for="(image, index) in images" :key="image.id">
                           <div class="image-preview-item">
                               <img :src="image.url" :alt="'Preview ' + (index + 1)" class="preview-image">
                               <button type="button" class="remove-image-btn" @click="removeImage(index)">
                                   <i class="fas fa-times"></i>
                               </button>
-                              <div class="upload-progress" x-show="image.uploading">
-                                  <div class="progress-bar" :style="'width: ' + image.progress + '%'"></div>
+                              <!-- Badge số thứ tự -->
+                              <div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.55);color:#fff;font-size:11px;border-radius:4px;padding:1px 6px;">
+                                  <span x-text="index + 1"></span>
                               </div>
                           </div>
                       </template>
@@ -190,7 +194,10 @@
       
                 <div class="form-actions">
                   <button type="button" class="btn-cancel" @click="resetForm">Huỷ</button>
-                  <button type="submit" class="btn-save">Lưu</button>
+                  <button type="submit" class="btn-save" :disabled="submitting">
+                    <span x-show="submitting"><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>
+                    <span x-show="!submitting">Lưu sản phẩm</span>
+                  </button>
                 </div>
               </form>
             </div>
@@ -237,6 +244,7 @@
           },
           images: [],
           uploadingCount: 0,
+          submitting: false,
           
           init() {
             this.fetchCategories();
@@ -282,6 +290,7 @@
             
             if (this.images.length + files.length > 5) {
                 this.showNotification('Chỉ được phép tải lên tối đa 5 hình ảnh!', 'error');
+                event.target.value = '';
                 return;
             }
             
@@ -290,128 +299,123 @@
                     this.showNotification(`File ${file.name} không phải là hình ảnh!`, 'error');
                     continue;
                 }
-                
                 if (file.size > 5 * 1024 * 1024) {
                     this.showNotification(`File ${file.name} quá lớn! Tối đa 5MB.`, 'error');
                     continue;
                 }
-                
-                this.uploadSingleImage(file);
+                // Chỉ tạo preview local, KHÔNG upload ngay
+                const newImage = {
+                    id: Date.now() + '_' + Math.floor(Math.random() * 100000),
+                    file: file,
+                    url: URL.createObjectURL(file),
+                    name: file.name
+                };
+                this.images.push(newImage);
+            }
+            
+            // Hiển thị ảnh đầu tiên vào preview chính
+            if (this.images.length > 0) {
+                this.previewImage = this.images[0].url;
             }
             
             event.target.value = '';
           },
           
-          async uploadSingleImage(file) {
-            const imageObj = {
-                file: file,
-                url: URL.createObjectURL(file),
-                uploading: true,
-                progress: 0,
-                cloudinaryUrl: null
-            };
-            
-            this.images.push(imageObj);
-            this.uploadingCount++;
-            
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                
-                const response = await axios.post('http://localhost:8080/api/sanpham/upload-image', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    onUploadProgress: (progressEvent) => {
-                        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                        imageObj.progress = progress;
-                    }
-                });
-                
-                imageObj.cloudinaryUrl = response.data;
-                imageObj.uploading = false;
-                
-                console.log(`✅ Upload thành công: ${file.name} -> ${response.data}`);
-                
-            } catch (error) {
-                console.error('❌ Lỗi upload:', error);
-                
-                const index = this.images.indexOf(imageObj);
-                if (index > -1) {
-                    this.images.splice(index, 1);
-                }
-                
-                this.showNotification(`Lỗi upload ${file.name}: ${error.message}`, 'error');
-            } finally {
-                this.uploadingCount--;
-            }
-          },
-          
           removeImage(index) {
-            const imageObj = this.images[index];
-            
-            if (imageObj.url && imageObj.url.startsWith('blob:')) {
-                URL.revokeObjectURL(imageObj.url);
-            }
-            
+            const img = this.images[index];
+            if (img && img.url && img.url.startsWith('blob:')) URL.revokeObjectURL(img.url);
             this.images.splice(index, 1);
+            this.previewImage = this.images.length > 0 ? this.images[0].url : '';
           },
           
-          submitProduct() {
-            if (this.uploadingCount > 0) {
-                this.showNotification('Vui lòng đợi upload hình ảnh hoàn tất!', 'warning');
-                return;
-            }
-            
+          async submitProduct() {
             if (this.images.length === 0) {
                 this.showNotification('Vui lòng thêm ít nhất 1 hình ảnh cho sản phẩm!', 'error');
                 return;
             }
-            
-            const hinhAnhUrls = this.images
-                .filter(img => img.cloudinaryUrl)
-                .map(img => img.cloudinaryUrl);
-            
-            if (hinhAnhUrls.length === 0) {
-                this.showNotification('Không có hình ảnh nào được upload thành công!', 'error');
+
+            if (!this.product.tenSanPham || !this.product.tenSanPham.trim()) {
+                this.showNotification('Vui lòng nhập tên sản phẩm!', 'error');
                 return;
             }
-            
-            const productData = {
-                tenSanPham: this.product.tenSanPham,
-                moTaNgan: this.product.moTaNgan,
-                giaBan: parseFloat(this.product.giaBan),
-                soLuong: parseInt(this.product.soLuong),
-                danhMucConId: parseInt(this.product.danhMucConId),
-                dungLuongId: this.product.dungLuongId ? parseInt(this.product.dungLuongId) : null,
-                mauSacId: this.product.mauSacId ? parseInt(this.product.mauSacId) : null,
-                hinhAnhUrls: hinhAnhUrls
-            };
-            
-            console.log('📤 Dữ liệu sản phẩm gửi lên:', productData);
+
+            if (!this.product.danhMucConId) {
+                this.showNotification('Vui lòng chọn danh mục sản phẩm!', 'error');
+                return;
+            }
             
             try {
                 this.submitting = true;
                 
+                // Tạo prefix từ tên sản phẩm
+                const prefix = this.product.tenSanPham.trim()
+                    .replace(/\s+/g, '_')
+                    .replace(/[^a-zA-Z0-9_]/g, '')
+                    .substring(0, 15) || 'SP';
+                
+                // Upload từng ảnh với tên format: SP_{prefix}_{index}
+                this.showNotification(`Đang upload ${this.images.length} hình ảnh...`, 'info');
+                const hinhAnhUrls = [];
+                
+                for (let i = 0; i < this.images.length; i++) {
+                    const img = this.images[i];
+                    try {
+                        const formData = new FormData();
+                        formData.append('file', img.file);
+                        formData.append('prefix', prefix);
+                        formData.append('index', String(i + 1));
+                        
+                        const uploadResp = await axios.post('http://localhost:8080/api/sanpham/upload-image', formData);
+                        hinhAnhUrls.push(uploadResp.data);
+                        console.log(`✅ Upload ảnh ${i+1}/${this.images.length}: ${uploadResp.data}`);
+                    } catch (uploadErr) {
+                        console.error(`❌ Lỗi upload ảnh ${i+1}:`, uploadErr);
+                        const status = uploadErr.response?.status ?? '';
+                        const errData = uploadErr.response?.data;
+                        const msg = errData
+                            ? (typeof errData === 'object' ? JSON.stringify(errData) : errData)
+                            : uploadErr.message;
+                        this.showNotification(`❌ Upload ảnh ${i+1} thất bại [HTTP ${status}]: ${msg}`, 'error');
+                        this.submitting = false;
+                        return;
+                    }
+                }
+                
+                this.showNotification('Đang lưu sản phẩm...', 'info');
+                
+                const productData = {
+                    tenSanPham:   this.product.tenSanPham.trim(),
+                    moTaNgan:     this.product.moTaNgan ? this.product.moTaNgan.trim() : '',
+                    giaBan:       parseFloat(this.product.giaBan),
+                    soLuong:      parseInt(this.product.soLuong) || 0,
+                    danhMucConId: parseInt(this.product.danhMucConId),
+                    dungLuongId:  this.product.dungLuongId ? parseInt(this.product.dungLuongId) : null,
+                    mauSacId:     this.product.mauSacId    ? parseInt(this.product.mauSacId)    : null,
+                    hinhAnhUrls:  hinhAnhUrls
+                };
+                
+                console.log('📤 Dữ liệu sản phẩm gửi lên:', productData);
+                
                 const response = await axios.post('http://localhost:8080/api/sanpham', productData);
                 
                 console.log('✅ Thêm sản phẩm thành công:', response.data);
-                
-                this.showNotification('Thêm sản phẩm thành công!', 'success');
+                this.showNotification('✅ Thêm sản phẩm thành công!', 'success');
                 
                 this.resetForm();
-                
-                window.dispatchEvent(new CustomEvent('productAdded', {
-                    detail: response.data
-                }));
+                window.dispatchEvent(new CustomEvent('productAdded', { detail: response.data }));
                 
                 setTimeout(() => {
-                    window.location.href = '/fe/adminSanPham.html';
+                    window.location.href = 'adminSanPham.html';
                 }, 1500);
                 
             } catch (error) {
                 console.error('❌ Lỗi thêm sản phẩm:', error);
-                this.showNotification('Lỗi thêm sản phẩm: ' + (error.response?.data || error.message), 'error');
+                const status = error.response?.status ? `[HTTP ${error.response.status}]` : '';
+                const msg = error.response?.data?.message
+                         || error.response?.data
+                         || error.message
+                         || 'Lỗi không xác định';
+                this.showNotification(`❌ Lỗi thêm sản phẩm ${status}: ${msg}`, 'error');
             } finally {
                 this.submitting = false;
             }
@@ -505,6 +509,18 @@
         background-color: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c6cb;
+      }
+
+      .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffc107;
+      }
+
+      .alert-info {
+        background-color: #cce5ff;
+        color: #004085;
+        border: 1px solid #b8daff;
       }
       
       .close {

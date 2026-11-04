@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+﻿package com.example.demo.controller;
 
 import com.example.demo.dto.SanPhamDTO;
 import com.example.demo.dto.SanPhamListDTO;
@@ -49,14 +49,14 @@ public class SanPhamController {
         return new ResponseEntity<>(sanPhams, HttpStatus.OK);
     }
     
-    //API lấy sản phẩm mới nhất
+    //API láº¥y sáº£n pháº©m má»›i nháº¥t
     @GetMapping("/latest")
     public ResponseEntity<List<SanPhamListDTO>> getLatestProducts() {
         List<SanPhamListDTO> sanPhams = sanPhamService.getLatestProducts();
         return new ResponseEntity<>(sanPhams, HttpStatus.OK);
     }
 
-    //API lấy chi tiết sản phẩm
+    //API láº¥y chi tiáº¿t sáº£n pháº©m
     @GetMapping("/chitiet/{id}")
     public ResponseEntity<SanPhamChiTietDTO> getSanPhamChiTiet(@PathVariable Integer id) {
         return sanPhamService.getSanPhamChiTiet(id)
@@ -64,7 +64,7 @@ public class SanPhamController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    //API lấy sản phẩm theo id
+    //API láº¥y sáº£n pháº©m theo id
     @GetMapping("/{id}")
     public ResponseEntity<SanPham> getSanPhamById(@PathVariable Integer id) {
         return sanPhamService.getSanPhamById(id)
@@ -84,23 +84,23 @@ public class SanPhamController {
         try {
             SanPham createdSanPham = sanPhamService.themSanPham(sanPhamDTO);
             
-            // Gửi WebSocket notification cho tất cả client
+            // Gá»­i WebSocket notification cho táº¥t cáº£ client
             if (createdSanPham != null) {
-                // Chuyển đổi sang SanPhamListDTO để gửi notification
+                // Chuyá»ƒn Ä‘á»•i sang SanPhamListDTO Ä‘á»ƒ gá»­i notification
                 SanPhamListDTO notificationDTO = convertToListDTO(createdSanPham);
                 webSocketService.notifyProductAdded(notificationDTO);
                 
-                System.out.println("✅ Đã thêm sản phẩm và gửi WebSocket notification: " + createdSanPham.getTenSanPham());
+                System.out.println("âœ… ÄĂ£ thĂªm sáº£n pháº©m vĂ  gá»­i WebSocket notification: " + createdSanPham.getTenSanPham());
             }
             
             return new ResponseEntity<>(createdSanPham, HttpStatus.CREATED);
         } catch (Exception e) {
-            System.err.println("❌ Lỗi khi thêm sản phẩm: " + e.getMessage());
+            System.err.println("âŒ Lá»—i khi thĂªm sáº£n pháº©m: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
-    // Helper method để chuyển đổi SanPham sang SanPhamListDTO
+    // Helper method Ä‘á»ƒ chuyá»ƒn Ä‘á»•i SanPham sang SanPhamListDTO
     private SanPhamListDTO convertToListDTO(SanPham sanPham) {
         SanPhamListDTO dto = new SanPhamListDTO();
         dto.setIdSp(sanPham.getIdSp());
@@ -115,7 +115,7 @@ public class SanPhamController {
             dto.setTenDanhMuc(sanPham.getDanhMucCon().getTenDanhMuc());
         }
         
-        // Lấy hình ảnh
+        // Láº¥y hĂ¬nh áº£nh
         List<String> hinhAnhUrls = sanPhamHinhAnhRepository.findHinhAnhUrlsByIdSp(sanPham.getIdSp());
         dto.setHinhAnhUrls(sanPhamService.formatHinhAnhUrls(hinhAnhUrls));
         
@@ -126,22 +126,22 @@ public class SanPhamController {
     public ResponseEntity<SanPhamListDTO> updateSanPham(@PathVariable Integer id, @Valid @RequestBody SanPhamListDTO sanPhamListDTO) {
         try {
             System.out.println("=== API PUT /api/sanpham/" + id + " ===");
-            System.out.println("Dữ liệu nhận được: " + sanPhamListDTO.toString());
+            System.out.println("Dá»¯ liá»‡u nháº­n Ä‘Æ°á»£c: " + sanPhamListDTO.toString());
             
             SanPhamListDTO updatedSanPham = sanPhamService.updateSanPhamFromDTO(id, sanPhamListDTO);
             
             if (updatedSanPham != null) {
-                // Gửi WebSocket notification cho tất cả client
+                // Gá»­i WebSocket notification cho táº¥t cáº£ client
                 webSocketService.notifyProductUpdated(updatedSanPham);
                 
-                System.out.println("✅ Đã cập nhật sản phẩm và gửi WebSocket notification: " + updatedSanPham.getTenSanPham());
+                System.out.println("âœ… ÄĂ£ cáº­p nháº­t sáº£n pháº©m vĂ  gá»­i WebSocket notification: " + updatedSanPham.getTenSanPham());
                 return ResponseEntity.ok(updatedSanPham);
             } else {
-                System.err.println("❌ Không tìm thấy sản phẩm với ID: " + id);
+                System.err.println("âŒ KhĂ´ng tĂ¬m tháº¥y sáº£n pháº©m vá»›i ID: " + id);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            System.err.println("❌ Lỗi khi cập nhật sản phẩm: " + e.getMessage());
+            System.err.println("âŒ Lá»—i khi cáº­p nháº­t sáº£n pháº©m: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -163,9 +163,12 @@ public class SanPhamController {
     }
 
     @PostMapping("/upload-image")
-    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "prefix", required = false, defaultValue = "SP") String prefix,
+            @RequestParam(value = "index", required = false, defaultValue = "1") int index) {
         try {
-            String imageUrl = imageStorageService.storeFile(file);
+            String imageUrl = imageStorageService.storeFile(file, prefix, index);
             return ResponseEntity.ok(imageUrl);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed: " + e.getMessage());
@@ -185,12 +188,12 @@ public class SanPhamController {
     @GetMapping("/test/status")
     public ResponseEntity<String> testAllProductsStatus() {
         try {
-            // Lấy tất cả sản phẩm không phân biệt trạng thái
+            // Láº¥y táº¥t cáº£ sáº£n pháº©m khĂ´ng phĂ¢n biá»‡t tráº¡ng thĂ¡i
             List<SanPham> allProducts = sanPhamRepository.findAll();
             StringBuilder result = new StringBuilder();
             
-            result.append("=== KIỂM TRA TRẠNG THÁI TẤT CẢ SẢN PHẨM ===\n");
-            result.append("Tổng số sản phẩm trong DB: ").append(allProducts.size()).append("\n\n");
+            result.append("=== KIá»‚M TRA TRáº NG THĂI Táº¤T Cáº¢ Sáº¢N PHáº¨M ===\n");
+            result.append("Tá»•ng sá»‘ sáº£n pháº©m trong DB: ").append(allProducts.size()).append("\n\n");
             
             int activeCount = 0;
             int inactiveCount = 0;
@@ -214,14 +217,14 @@ public class SanPhamController {
                     sp.getIdSp(), sp.getTenSanPham(), statusStr));
             }
             
-            result.append("\n=== THỐNG KÊ ===\n");
-            result.append("Sản phẩm ACTIVE (true): ").append(activeCount).append("\n");
-            result.append("Sản phẩm INACTIVE (false): ").append(inactiveCount).append("\n");
-            result.append("Sản phẩm NULL: ").append(nullCount).append("\n");
+            result.append("\n=== THá»NG KĂ ===\n");
+            result.append("Sáº£n pháº©m ACTIVE (true): ").append(activeCount).append("\n");
+            result.append("Sáº£n pháº©m INACTIVE (false): ").append(inactiveCount).append("\n");
+            result.append("Sáº£n pháº©m NULL: ").append(nullCount).append("\n");
             
             // Test query getAllSanPham
             List<SanPhamListDTO> activeProducts = sanPhamService.getAllSanPham();
-            result.append("\nSản phẩm trả về từ getAllSanPham(): ").append(activeProducts.size()).append("\n");
+            result.append("\nSáº£n pháº©m tráº£ vá» tá»« getAllSanPham(): ").append(activeProducts.size()).append("\n");
             
             System.out.println(result.toString());
             return ResponseEntity.ok(result.toString());
@@ -240,7 +243,7 @@ public class SanPhamController {
 
     /**
      * GET /api/sanpham/danhmuc/{id}?sort=newest|price-asc|price-desc
-     * Lấy sản phẩm theo danh mục, có hỗ trợ sắp xếp
+     * Láº¥y sáº£n pháº©m theo danh má»¥c, cĂ³ há»— trá»£ sáº¯p xáº¿p
      */
     @GetMapping("/danhmuc/{id}")
     public ResponseEntity<List<SanPhamListDTO>> getSanPhamByDanhMuc(
@@ -252,7 +255,7 @@ public class SanPhamController {
 
     /**
      * GET /api/sanpham/all?sort=newest|price-asc|price-desc
-     * Lấy tất cả sản phẩm có hỗ trợ sắp xếp
+     * Láº¥y táº¥t cáº£ sáº£n pháº©m cĂ³ há»— trá»£ sáº¯p xáº¿p
      */
     @GetMapping("/all")
     public ResponseEntity<List<SanPhamListDTO>> getAllSanPhamSorted(
