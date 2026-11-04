@@ -85,46 +85,58 @@ public class KhachHangController {
     @PostMapping("/dang-nhap")
     public ResponseEntity<ResponseDto<UserInfoDto>> dangNhap(@RequestBody DangNhapDto dangNhapDto) {
         try {
-            // Kiểm tra tài khoản admin đặc biệt
-            if ("admin@techno.vn".equals(dangNhapDto.getEmail()) && "123456".equals(dangNhapDto.getMatKhau())) {
-                // Tìm khách hàng admin
+            // ── Kiểm tra tài khoản admin ──────────────────────────────────────────
+            if ("admin@techno.vn".equals(dangNhapDto.getEmail())
+                    && "123456".equals(dangNhapDto.getMatKhau())) {
+
+                KhachHang admin;
                 Optional<KhachHang> optionalAdmin = khachHangService.findByEmail("admin@techno.vn");
-                
+
                 if (optionalAdmin.isPresent()) {
-                    KhachHang admin = optionalAdmin.get();
-                    
-                    // Trả về thông tin admin
-                    UserInfoDto adminInfo = UserInfoDto.builder()
-                            .idKH(admin.getIdKH())
-                            .hoTen(admin.getHoTen())
-                            .email(admin.getEmail())
-                            .vaiTro("ADMIN")
-                            .build();
-                    
-                    return ResponseEntity.ok(ResponseDto.success("Đăng nhập thành công", adminInfo));
+                    admin = optionalAdmin.get();
+                    // Đảm bảo tài khoản admin không bị khóa
+                    if (Boolean.FALSE.equals(admin.getTrangThai())) {
+                        admin.setTrangThai(true);
+                        khachHangService.saveKhachHang(admin);
+                    }
+                } else {
+                    // Record chưa tồn tại → tạo mới
+                    admin = new KhachHang();
+                    admin.setHoTen("Quản trị viên");
+                    admin.setEmail("admin@techno.vn");
+                    admin.setMatKhau("123456");
+                    // Không set SDT để tránh trùng unique constraint
+                    admin.setTrangThai(true);
+                    admin = khachHangService.saveKhachHang(admin);
                 }
+
+                UserInfoDto adminInfo = UserInfoDto.builder()
+                        .idKH(admin.getIdKH())
+                        .hoTen(admin.getHoTen())
+                        .email(admin.getEmail())
+                        .vaiTro("ADMIN")
+                        .build();
+
+                return ResponseEntity.ok(ResponseDto.success("Đăng nhập thành công", adminInfo));
             }
-            
-            // Xử lý đăng nhập thông thường
+
+            // ── Đăng nhập thông thường ────────────────────────────────────────────
             Optional<KhachHang> optionalKhachHang = khachHangService.findByEmail(dangNhapDto.getEmail());
-            
+
             if (optionalKhachHang.isEmpty()) {
                 return ResponseEntity.badRequest().body(ResponseDto.error("Email không tồn tại"));
             }
-            
+
             KhachHang khachHang = optionalKhachHang.get();
-            
-            // Kiểm tra mật khẩu
+
             if (!dangNhapDto.getMatKhau().equals(khachHang.getMatKhau())) {
                 return ResponseEntity.badRequest().body(ResponseDto.error("Mật khẩu không chính xác"));
             }
-            
-            // Kiểm tra trạng thái tài khoản
-            if (!khachHang.getTrangThai()) {
+
+            if (Boolean.FALSE.equals(khachHang.getTrangThai())) {
                 return ResponseEntity.badRequest().body(ResponseDto.error("Tài khoản đã bị khóa"));
             }
-            
-            // Trả về thông tin người dùng
+
             UserInfoDto userInfoDto = UserInfoDto.builder()
                     .idKH(khachHang.getIdKH())
                     .hoTen(khachHang.getHoTen())
@@ -135,9 +147,12 @@ public class KhachHangController {
                     .tongChiTieu(khachHang.getTongChiTieu() != null ? khachHang.getTongChiTieu().doubleValue() : 0.0)
                     .vaiTro("USER")
                     .build();
-            
+
             return ResponseEntity.ok(ResponseDto.success("Đăng nhập thành công", userInfoDto));
+
         } catch (Exception e) {
+            System.err.println("❌ Lỗi đăng nhập: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(ResponseDto.error("Đăng nhập thất bại: " + e.getMessage()));
         }
     }
