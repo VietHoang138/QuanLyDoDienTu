@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Báo Cáo Thống Kê Danh Sách Sản Phẩm - TechNo</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/lg.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         * {
@@ -33,7 +34,7 @@
         }
 
         /* Toolbar điều khiển (ẩn khi in) */
-        .no-print-toolbar {
+        div.no-print-toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -44,6 +45,44 @@
             border-radius: 8px;
             padding: 15px 20px;
             margin-bottom: 25px;
+        }
+
+        /* Cột chi tiết / in ấn trong bảng sản phẩm */
+        table.report-table th.no-print-toolbar {
+            background-color: #1e3a8a !important;
+            color: #ffffff !important;
+            text-align: center;
+            vertical-align: middle;
+            width: 70px;
+        }
+
+        table.report-table td.no-print-toolbar {
+            background: transparent !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 8px;
+        }
+
+        .btn-print-row-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background-color: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin: 0 auto;
+        }
+
+        .btn-print-row-link:hover {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
         }
 
         .toolbar-group {
@@ -367,7 +406,8 @@
             <button onclick="exportToExcel()" class="btn btn-outline">
                 <i class="fas fa-file-excel"></i> Xuất CSV/Excel
             </button>
-            <a href="${pageContext.request.contextPath}/fe/adminSanPham.html" class="btn btn-secondary">
+            <a href="<c:out value='${param.returnUrl}' default='${pageContext.request.contextPath}/fe/adminSanPham.html'/>" class="btn btn-secondary"
+               onclick="if (window.opener && !window.opener.closed) { window.opener.focus(); window.close(); return false; }">
                 <i class="fas fa-arrow-left"></i> Quay Lại Quản Lý
             </a>
         </div>
@@ -376,7 +416,7 @@
     <!-- Header Báo Cáo -->
     <div class="report-header">
         <div class="company-info">
-            <h2>Tech<span>No</span> Store</h2>
+            <h2><img src="${pageContext.request.contextPath}/images/logo.png" alt="TechNo" style="width: 56px; height: 48px; object-fit: contain;"></h2>
             <p><i class="fas fa-map-marker-alt"></i> Hệ thống Bán Lẻ Thiết Bị Công Nghệ & Điện Tử</p>
             <p><i class="fas fa-phone"></i> Hotline: 1900-8888 | Website: techno.vn</p>
         </div>
@@ -485,7 +525,7 @@
                                     </c:choose>
                                 </td>
                                 <td class="text-center no-print-toolbar">
-                                    <a href="${pageContext.request.contextPath}/report/sanpham/${sp.idSp}" target="_blank" title="Xem chi tiết & in mẫu đơn này" style="color: #2563eb;">
+                                    <a href="${pageContext.request.contextPath}/report/sanpham/${sp.idSp}" target="_blank" class="btn-print-row-link" title="Xem chi tiết & in mẫu đơn này">
                                         <i class="fas fa-print"></i>
                                     </a>
                                 </td>
@@ -561,4 +601,3 @@
 </script>
 </body>
 </html>
-

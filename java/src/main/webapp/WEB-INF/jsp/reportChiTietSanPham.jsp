@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phiếu Báo Cáo Chi Tiết Sản Phẩm #${sp.idSp} - TechNo</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/lg.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         * {
@@ -260,7 +261,7 @@
     <!-- Header Báo Cáo -->
     <div class="report-header">
         <div class="company-info">
-            <h2>Tech<span>No</span> Store</h2>
+            <h2><img src="${pageContext.request.contextPath}/images/logo.png" alt="TechNo" style="width: 56px; height: 48px; object-fit: contain;"></h2>
             <p><i class="fas fa-map-marker-alt"></i> Hệ thống Bán Lẻ Thiết Bị Công Nghệ & Điện Tử</p>
             <p><i class="fas fa-phone"></i> Hotline: 1900-8888 | Website: techno.vn</p>
         </div>
@@ -404,4 +405,3 @@
 
 </body>
 </html>
-
