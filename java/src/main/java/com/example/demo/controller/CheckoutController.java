@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.CheckoutRequestDTO;
 import com.example.demo.dto.CheckoutResponseDTO;
+import com.example.demo.dto.SanPhamDaBanDTO;
 import com.example.demo.entity.DonHang;
 import com.example.demo.entity.LichSuDonHang;
 import com.example.demo.entity.ThongBao;
@@ -50,6 +51,12 @@ public class CheckoutController {
     @GetMapping("/admin/orders")
     public ResponseEntity<List<DonHang>> getAllOrdersForAdmin() {
         return ResponseEntity.ok(donHangService.getAllOrders());
+    }
+
+    // ── ADMIN: tổng hợp sản phẩm đã bán (đặt hàng thành công) ────────────────
+    @GetMapping("/admin/sold-products")
+    public ResponseEntity<List<SanPhamDaBanDTO>> getSoldProducts() {
+        return ResponseEntity.ok(donHangService.getSoldProducts());
     }
 
     /**

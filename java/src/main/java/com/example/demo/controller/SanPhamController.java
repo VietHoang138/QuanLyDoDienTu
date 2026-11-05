@@ -3,8 +3,10 @@ package com.example.demo.controller;
 import com.example.demo.dto.SanPhamDTO;
 import com.example.demo.dto.SanPhamListDTO;
 import com.example.demo.dto.SanPhamChiTietDTO;
+import com.example.demo.dto.SanPhamDaBanDTO;
 import com.example.demo.entity.SanPham;
 import com.example.demo.service.SanPhamService;
+import com.example.demo.service.DonHangService;
 import com.example.demo.service.ImageStorageService;
 import com.example.demo.service.CloudinaryService;
 import com.example.demo.repository.SanPhamRepository;
@@ -42,6 +44,17 @@ public class SanPhamController {
     
     @Autowired
     private WebSocketService webSocketService;
+
+    @Autowired(required = false)
+    private DonHangService donHangService;
+
+    @GetMapping("/da-ban")
+    public ResponseEntity<List<SanPhamDaBanDTO>> getSanPhamDaBan() {
+        if (donHangService != null) {
+            return ResponseEntity.ok(donHangService.getSoldProducts());
+        }
+        return ResponseEntity.ok(new ArrayList<>());
+    }
 
     @GetMapping
     public ResponseEntity<List<SanPhamListDTO>> getAllSanPham() {

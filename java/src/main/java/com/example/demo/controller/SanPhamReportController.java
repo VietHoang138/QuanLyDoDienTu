@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.SanPhamChiTietDTO;
+import com.example.demo.dto.SanPhamDaBanDTO;
 import com.example.demo.dto.SanPhamListDTO;
 import com.example.demo.entity.DanhMuc;
 import com.example.demo.service.DanhMucService;
+import com.example.demo.service.DonHangService;
 import com.example.demo.service.SanPhamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,9 @@ public class SanPhamReportController {
 
     @Autowired
     private DanhMucService danhMucService;
+
+    @Autowired(required = false)
+    private DonHangService donHangService;
 
     /**
      * Báo cáo danh sách sản phẩm (có lọc theo từ khóa, danh mục, trạng thái tồn kho)
@@ -129,9 +134,98 @@ public class SanPhamReportController {
     }
 
     /**
-     * Báo cáo thống kê chi tiết của một sản phẩm cụ thể
+     * Báo cáo thống kê sản phẩm đã bán & doanh thu (JSP)
+     * ĐẶT TRƯỚC /{id} ĐỂ TRÁNH SPRING BỊ CONFLICT ROUTING
      */
-    @GetMapping("/{id}")
+    @GetMapping(value = {"/da-ban", "/daban", "/san-pham-da-ban"})
+    public String baoCaoSanPhamDaBan(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer danhMucId,
+            Model model) {
+
+        List<SanPhamDaBanDTO> soldList = donHangService != null ? donHangService.getSoldProducts() : List.of();
+        if (soldList == null) {
+            soldList = List.of();
+        }
+
+        // Lọc danh sách theo các tiêu chí
+        List<SanPhamDaBanDTO> filtered = soldList.stream()
+                .filter(sp -> {
+                    // Lọc từ khóa
+                    if (keyword != null && !keyword.trim().isEmpty()) {
+                        String kw = keyword.toLowerCase().trim();
+                        boolean matchName = sp.getTenSanPham() != null && sp.getTenSanPham().toLowerCase().contains(kw);
+                        boolean matchId = sp.getIdSp() != null && sp.getIdSp().toString().contains(kw);
+                        boolean matchCat = sp.getTenDanhMuc() != null && sp.getTenDanhMuc().toLowerCase().contains(kw);
+                        if (!matchName && !matchId && !matchCat) {
+                            return false;
+                        }
+                    }
+
+                    // Lọc theo danh mục
+                    if (danhMucId != null) {
+                        DanhMuc dm = danhMucService.getDanhMucById(danhMucId).orElse(null);
+                        if (dm != null && sp.getTenDanhMuc() != null && !sp.getTenDanhMuc().equalsIgnoreCase(dm.getTenDanhMuc())) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        // Tính toán các chỉ số thống kê tổng hợp
+        int tongSoMatHang = filtered.size();
+        int tongSoLuongDaBan = 0;
+        BigDecimal tongDoanhThu = BigDecimal.ZERO;
+        int tongSoDonHang = 0;
+
+        for (SanPhamDaBanDTO sp : filtered) {
+            int sl = sp.getSoLuongDaBan() != null ? sp.getSoLuongDaBan() : 0;
+            tongSoLuongDaBan += sl;
+
+            if (sp.getTongTienBan() != null) {
+                tongDoanhThu = tongDoanhThu.add(sp.getTongTienBan());
+            }
+
+            if (sp.getDanhSachDonHang() != null) {
+                tongSoDonHang += sp.getDanhSachDonHang().size();
+            } else if (sp.getSoDonHang() != null) {
+                tongSoDonHang += sp.getSoDonHang();
+            }
+        }
+
+        List<DanhMuc> danhMucList = danhMucService.getAllDanhMuc();
+        String tenDanhMucDaChon = null;
+        if (danhMucId != null) {
+            tenDanhMucDaChon = danhMucList.stream()
+                    .filter(dm -> dm.getIdDanhMuc().equals(danhMucId))
+                    .map(DanhMuc::getTenDanhMuc)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        String ngayLap = LocalDateTime.now().format(formatter);
+        String maBaoCao = "DB-" + String.valueOf(System.currentTimeMillis()).substring(7);
+
+        model.addAttribute("sanPhams", filtered);
+        model.addAttribute("tongSoMatHang", tongSoMatHang);
+        model.addAttribute("tongSoLuongDaBan", tongSoLuongDaBan);
+        model.addAttribute("tongDoanhThu", tongDoanhThu);
+        model.addAttribute("tongSoDonHang", tongSoDonHang);
+        model.addAttribute("danhMucList", danhMucList);
+        model.addAttribute("tenDanhMucDaChon", tenDanhMucDaChon);
+        model.addAttribute("ngayLap", ngayLap);
+        model.addAttribute("maBaoCao", maBaoCao);
+
+        return "reportSanPhamDaBan";
+    }
+
+    /**
+     * Báo cáo thống kê chi tiết của một sản phẩm cụ thể (chỉ nhận số)
+     */
+    @GetMapping("/{id:[0-9]+}")
     public String baoCaoChiTietSanPham(@PathVariable Integer id, Model model) {
         Optional<SanPhamChiTietDTO> chiTietOpt = sanPhamService.getSanPhamChiTiet(id);
 
