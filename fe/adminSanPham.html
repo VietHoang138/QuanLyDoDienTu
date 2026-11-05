@@ -104,7 +104,10 @@
               <h1>Sản phẩm</h1>
               <p>Quản lý thông tin, tồn kho và hình ảnh sản phẩm.</p>
             </div>
-            <div class="header-controls">
+            <div class="header-controls" style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" class="btn-report" @click="openReportModal()">
+                <i class="fas fa-print"></i> Báo cáo & In ấn (JSP)
+              </button>
               <a href="admins.html" class="btn-save">Thêm sản phẩm</a>
             </div>
           </div>
@@ -152,6 +155,9 @@
                   </td>
                   <td x-text="product.soLuong"></td>
                   <td class="action-buttons">
+                    <button class="btn-print-row" @click="printSingleProduct(product.idSp)" title="In báo cáo chi tiết sản phẩm này (JSP)">
+                      <i class="fas fa-print"></i>
+                    </button>
                     <button class="btn-edit" @click="openEditModal(product)">
                       <i class="fas fa-edit"></i>
                     </button>
@@ -167,6 +173,50 @@
         </main>  
     </div>
     
+    <!-- Modal lọc và in báo cáo (JSP) -->
+    <div class="modal" x-show="reportModal.show" @click.away="closeReportModal()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-print"></i> Báo Cáo & In Danh Sách (JSP)</h3>
+          <button class="modal-close" @click="closeReportModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
+            Kết xuất giao diện báo cáo chuyên nghiệp bằng <strong>JSP & JSTL</strong> hỗ trợ in ấn A4 chuẩn doanh nghiệp.
+          </p>
+          <div class="form-group">
+            <label for="report-keyword">Tìm kiếm (tên / mã SP):</label>
+            <input type="text" id="report-keyword" x-model="reportModal.keyword" placeholder="Nhập tên hoặc mã sản phẩm...">
+          </div>
+          <div class="form-group">
+            <label for="report-category">Lọc theo danh mục:</label>
+            <select id="report-category" x-model="reportModal.danhMucId" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="">-- Tất cả danh mục --</option>
+              <template x-for="cat in categories" :key="cat.idDanhMuc">
+                <option :value="cat.idDanhMuc" x-text="cat.tenDanhMuc"></option>
+              </template>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="report-status">Tình trạng tồn kho:</label>
+            <select id="report-status" x-model="reportModal.trangThai" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="all">Tất cả sản phẩm</option>
+              <option value="con-hang">Chỉ sản phẩm còn hàng (SL > 0)</option>
+              <option value="het-hang">Chỉ sản phẩm hết hàng (SL = 0)</option>
+            </select>
+          </div>
+          <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <button type="button" class="btn-save" style="background-color: #2563eb; width: 100%; cursor: pointer;" @click="generateFilteredReport()">
+              <i class="fas fa-filter"></i> Mở Báo Cáo Theo Bộ Lọc (JSP)
+            </button>
+            <button type="button" class="btn-save" style="background-color: #10b981; width: 100%; cursor: pointer;" @click="generateAllReport()">
+              <i class="fas fa-boxes"></i> In Toàn Bộ Sản Phẩm (Không Lọc)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal chỉnh sửa sản phẩm -->
     <div class="modal" x-show="editModal.show" @click.away="closeEditModal()">
       <div class="modal-content">
@@ -306,6 +356,14 @@
           deleteModal: {
             show: false,
             product: null
+          },
+          
+          // Modal báo cáo (JSP)
+          reportModal: {
+            show: false,
+            keyword: '',
+            danhMucId: '',
+            trangThai: 'all'
           },
           
           // WebSocket connection
@@ -745,6 +803,51 @@
                 this.showNotification('Xóa sản phẩm thất bại!', 'error');
               });
           },
+
+          // Quản lý Báo Cáo & In Ấn (JSP)
+          openReportModal() {
+            this.reportModal.keyword = this.searchTerm || '';
+            this.reportModal.show = true;
+          },
+
+          closeReportModal() {
+            this.reportModal.show = false;
+          },
+
+          generateFilteredReport() {
+            const params = new URLSearchParams();
+            if (this.reportModal.keyword && this.reportModal.keyword.trim()) {
+              params.append('keyword', this.reportModal.keyword.trim());
+            }
+            if (this.reportModal.danhMucId) {
+              params.append('danhMucId', this.reportModal.danhMucId);
+            }
+            if (this.reportModal.trangThai && this.reportModal.trangThai !== 'all') {
+              params.append('trangThai', this.reportModal.trangThai);
+            }
+            const query = params.toString() ? ('?' + params.toString()) : '';
+            window.open('http://localhost:8080/report/sanpham' + query, '_blank');
+            this.closeReportModal();
+          },
+
+          generateAllReport() {
+            window.open('http://localhost:8080/report/sanpham', '_blank');
+            this.closeReportModal();
+          },
+
+          printSingleProduct(idSp) {
+            window.open('http://localhost:8080/report/sanpham/' + idSp, '_blank');
+          },
+
+          loadCategories() {
+            axios.get('http://localhost:8080/api/danhmuc')
+              .then(response => {
+                this.categories = response.data || [];
+              })
+              .catch(error => {
+                console.warn('Không thể tải danh mục:', error.message);
+              });
+          },
           
           // Xử lý upload hình ảnh mới trong modal edit
           async handleEditImageUpload(event) {
@@ -1000,6 +1103,37 @@
       
       .btn-delete:hover {
         background-color: #d32f2f;
+      }
+      
+      .btn-report {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background-color 0.2s;
+        text-decoration: none;
+      }
+      .btn-report:hover {
+        background-color: #1d4ed8;
+      }
+      
+      .btn-print-row {
+        background-color: #10b981;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 10px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .btn-print-row:hover {
+        background-color: #059669;
       }
       
       /* Styles cho modal */
